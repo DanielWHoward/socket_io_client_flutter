@@ -2,7 +2,7 @@
 // History: 2020/11/27 11:47 AM
 // Author: jumperchen<jumperchen@potix.com>
 
-import 'package:socket_io_client/socket_io_client.dart';
+import '../socket_io_client.dart';
 import 'package:socket_io_common/src/util/event_emitter.dart';
 
 /// Default event listeners for dart way API.

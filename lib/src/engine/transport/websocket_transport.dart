@@ -3,24 +3,36 @@
 // Author: jumperchen<jumperchen@potix.com>
 
 import 'dart:async';
-import 'dart:html';
+// import 'dart:html';
 import 'package:logging/logging.dart';
-import 'package:socket_io_client/src/engine/transport/transport.dart';
+import '../../../src/engine/transport/transport.dart';
 import 'package:socket_io_common/src/engine/parser/parser.dart';
-import 'package:socket_io_client/src/engine/parseqs.dart';
+import '../../../src/engine/parseqs.dart';
+
+class MessageEvent {
+  dynamic data;
+}
+
+class WebSocket {
+  dynamic binaryType = '';
+  dynamic onOpen, onClose, onError, onMessage;
+  WebSocket(uri, protocols) {}
+  send(dynamic msg) {}
+  close() {}
+}
 
 class WebSocketTransport extends Transport {
   static final Logger _logger =
       Logger('socket_io_client:transport.WebSocketTransport');
 
   @override
-  String? name = 'websocket';
-  late var protocols;
+  String name = 'websocket';
+  var protocols;
 
   @override
-  bool? supportsBinary;
-  late Map perMessageDeflate;
-  WebSocket? ws;
+  bool supportsBinary;
+  Map perMessageDeflate;
+  WebSocket ws;
 
   WebSocketTransport(Map opts) : super(opts) {
     var forceBase64 = opts['forceBase64'];
@@ -40,11 +52,11 @@ class WebSocketTransport extends Transport {
       return emit('error', err);
     }
 
-    if (ws!.binaryType == null) {
+    if (ws.binaryType == null) {
       supportsBinary = false;
     }
 
-    ws!.binaryType = 'arraybuffer';
+    ws.binaryType = 'arraybuffer';
 
     addEventListeners();
   }
@@ -53,7 +65,7 @@ class WebSocketTransport extends Transport {
   ///
   /// @api private
   void addEventListeners() {
-    ws!
+    ws
       ..onOpen.listen((_) => onOpen())
       ..onClose.listen((_) => onClose())
       ..onMessage.listen((MessageEvent evt) => onData(evt.data))
@@ -92,7 +104,7 @@ class WebSocketTransport extends Transport {
         // throw an error
         try {
           // TypeError is thrown when passing the second argument on Safari
-          ws!.send(data);
+          ws.send(data);
         } catch (e) {
           _logger.fine('websocket closed before onclose event');
         }

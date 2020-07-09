@@ -4,25 +4,25 @@
 import 'package:logging/logging.dart';
 import 'package:socket_io_common/src/engine/parser/parser.dart';
 import 'package:socket_io_common/src/util/event_emitter.dart';
-import 'package:socket_io_client/src/engine/socket.dart';
+import '../../../src/engine/socket.dart';
 
 abstract class Transport extends EventEmitter {
   static final Logger _logger = Logger('socket_io_client:transport.Transport');
 
-  late String path;
-  late String hostname;
-  int? port;
-  late bool secure;
-  Map? query;
-  String? timestampParam;
-  bool? timestampRequests;
-  String? readyState;
-  bool? agent;
-  Socket? socket;
-  bool? enablesXDR;
-  bool? writable;
-  String? name;
-  bool? supportsBinary;
+  String path;
+  String hostname;
+  int port;
+  bool secure;
+  Map query;
+  String timestampParam;
+  bool timestampRequests;
+  String readyState;
+  bool agent;
+  Socket socket;
+  bool enablesXDR;
+  bool writable;
+  String name;
+  bool supportsBinary;
 
   Transport(Map opts) {
     path = opts['path'];

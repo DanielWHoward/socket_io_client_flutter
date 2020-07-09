@@ -7,23 +7,23 @@ import 'dart:io';
 import 'dart:typed_data';
 //import 'dart:html';
 import 'package:logging/logging.dart';
-import 'package:socket_io_client/src/engine/transport/transport.dart';
+import '../../../src/engine/transport/transport.dart';
 import 'package:socket_io_common/src/engine/parser/parser.dart';
-import 'package:socket_io_client/src/engine/parseqs.dart';
+import '../../../src/engine/parseqs.dart';
 
 class IOWebSocketTransport extends Transport {
   static final Logger _logger =
       Logger('socket_io_client:transport.IOWebSocketTransport');
 
   @override
-  String? name = 'websocket';
+  String name = 'websocket';
   var protocols;
 
   @override
-  bool? supportsBinary;
-  Map? perMessageDeflate;
-  Map<String, dynamic>? extraHeaders;
-  WebSocket? ws;
+  bool supportsBinary;
+  Map perMessageDeflate;
+  Map<String, dynamic> extraHeaders;
+  WebSocket ws;
 
   IOWebSocketTransport(Map opts) : super(opts) {
     var forceBase64 = opts['forceBase64'];

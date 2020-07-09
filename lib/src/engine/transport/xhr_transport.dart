@@ -2,22 +2,133 @@
 // History:  27/04/2017
 // Author: jumperchen<jumperchen@potix.com>
 import 'dart:async';
-import 'dart:html';
+// import 'dart:html';
 
 import 'dart:typed_data';
 import 'package:logging/logging.dart';
+import 'package:http/http.dart' as http;
 import 'package:socket_io_common/src/util/event_emitter.dart';
-import 'package:socket_io_client/src/engine/transport/polling_transport.dart';
+import '../../../src/engine/transport/polling_transport.dart';
 
 final Logger _logger = Logger('socket_io_client:transport.XHRTransport');
 
+class FlutterHttpRequestStreamSubscription extends StreamSubscription {
+  @override
+  Future<E> asFuture<E>([E futureValue]) {
+    return null;
+  }
+  @override
+  Future cancel() {
+    return null;
+  }
+  @override
+  bool get isPaused => null;
+  @override
+  void onData(void Function(dynamic data) handleData) {}
+  @override
+  void onDone(void Function() handleDone) {}
+  @override
+  void onError(Function handleError) {}
+  @override
+  void pause([Future resumeSignal]) {}
+  @override
+  void resume() {}
+}
+
+typedef HttpRequestCallback = Null Function(dynamic);
+
+class FlutterEvent {}
+
+class FlutterHttpRequestStream /*extends Stream<FlutterEvent>*/ {
+  HttpRequest req;
+  HttpRequestCallback listener;
+  FlutterHttpRequestStream();
+  StreamSubscription listen(HttpRequestCallback onData,
+      {Function onError, void onDone(), bool cancelOnError}) {
+    this.listener = onData;
+    return FlutterHttpRequestStreamSubscription();
+  }
+}
+
+class FlutterHttpRequest {
+  Future future;
+  String method;
+  String url;
+  static Map<String, String> headers = Map<String, String>();
+  var timeout;
+  var onload;
+  var onerror;
+  var readyState = -1;
+  var onReadyStateChange = FlutterHttpRequestStream();
+  var responseType;
+  var status;
+  var responseText;
+  ByteBuffer response;
+  Map<String, String> responseHeaders = {};
+  FlutterHttpRequest() {
+    onReadyStateChange.req = this;
+  }
+  open(String method, String url, {bool asynch, String user, String password}) {
+    this.method = method;
+    this.url = url;
+  }
+  abort() {}
+  setRequestHeader(String key, String value) {
+    headers[key] = value;
+  }
+  Future<http.Response> send(var data) {
+    var self = this;
+    try {
+      if (method == 'GET') {
+        _logger.fine('FlutterHttpRequest ${method} ${url}');
+        future = http.get(Uri.parse(url), headers: headers);
+      } else if (method == 'POST') {
+        _logger.fine('FlutterHttpRequest ${method} ${url} ${data}');
+        future = http.post(Uri.parse(url), headers: headers, body: data);
+      }
+      future.then((response) {
+        if (response.headers['set-cookie'] != null) {
+          headers['cookie'] = response.headers['set-cookie'];
+        }
+        responseText = response.body;
+        status = response.statusCode;
+        _logger.fine(
+            'FlutterHttpRequest ${method} ${status} ${url} ${data} ${responseText}');
+        Map event = {'target': self};
+        readyState = 2;
+        responseHeaders = response.headers as Map<String, String>;
+        onReadyStateChange.listener(event);
+        if (responseType == 'arraybuffer') {
+          this.response = response.bodyBytes.buffer;
+        }
+        readyState = 4;
+        onReadyStateChange.listener(event);
+      });
+      return future;
+    } catch (e) {
+      onerror(e);
+      return null;
+    }
+  }
+  String getResponseHeader(String typ) {
+    for (String key in responseHeaders.keys) {
+      if (key.toLowerCase() == typ.toLowerCase()) {
+        return responseHeaders[key];
+      }
+    }
+    return null;
+  }
+}
+
+class HttpRequest extends FlutterHttpRequest {}
+
 class XHRTransport extends PollingTransport {
   // int? requestTimeout;
-  late bool xd;
-  late bool xs;
-  Request? sendXhr;
-  Request? pollXhr;
-  late Map<String, dynamic> extraHeaders;
+  bool xd;
+  bool xs;
+  Request sendXhr;
+  Request pollXhr;
+  Map<String, dynamic> extraHeaders;
 
   ///
   /// XHR Polling constructor.
@@ -28,15 +139,18 @@ class XHRTransport extends PollingTransport {
     // requestTimeout = opts['requestTimeout'];
     extraHeaders = opts['extraHeaders'] ?? <String, dynamic>{};
 
-    var isSSL = 'https:' == window.location.protocol;
-    var port = window.location.port;
+    var window = {
+      'location': {'hostname': '', 'protocol': 'https', 'port': '443'}
+    };
+    var isSSL = 'https:' == window['location']['protocol'];
+    var port = window['location']['port'];
 
     // some user agents have empty `location.port`
     if (port.isEmpty) {
       port = isSSL ? '443' : '80';
     }
 
-    xd = opts['hostname'] != window.location.hostname ||
+    xd = opts['hostname'] != window['location']['hostname'] ||
         int.parse(port) != opts['port'];
     xs = opts['secure'] != isSSL;
   }
@@ -44,13 +158,13 @@ class XHRTransport extends PollingTransport {
   ///
   /// XHR supports binary
   @override
-  bool? supportsBinary = true;
+  bool supportsBinary = true;
 
   ///
   /// Creates a request.
   ///
   /// @api private
-  Request request([Map? opts]) {
+  Request request([Map opts]) {
     opts = opts ?? {};
     opts['uri'] = uri();
     opts['xd'] = xd;
@@ -117,27 +231,27 @@ class XHRTransport extends PollingTransport {
 /// @api public
 ///
 class Request extends EventEmitter {
-  late String uri;
-  late bool xd;
-  late bool xs;
-  late bool async;
-  late var data;
-  late bool agent;
-  bool? isBinary;
-  late bool supportsBinary;
-  late bool enablesXDR;
+  String uri;
+  bool xd;
+  bool xs;
+  bool asynch;
+  var data;
+  bool agent;
+  bool isBinary;
+  bool supportsBinary;
+  bool enablesXDR;
   // late int requestTimeout;
-  HttpRequest? xhr;
-  late String method;
-  StreamSubscription? readyStateChange;
-  Map<String, dynamic>? extraHeaders;
+  HttpRequest xhr;
+  String method;
+  StreamSubscription readyStateChange;
+  Map<String, dynamic> extraHeaders;
 
   Request(Map opts) {
     method = opts['method'] ?? 'GET';
     uri = opts['uri'];
     xd = opts['xd'] == true;
     xs = opts['xs'] == true;
-    async = opts['async'] != false;
+    asynch = opts['async'] != false;
     data = opts['data'];
     agent = opts['agent'];
     isBinary = opts['isBinary'];
@@ -161,11 +275,11 @@ class Request extends EventEmitter {
 
     try {
       _logger.fine('xhr open $method: $uri');
-      xhr.open(method, uri, async: async);
+      xhr.open(method, uri, asynch: asynch);
 
       try {
         if (extraHeaders?.isNotEmpty == true) {
-          extraHeaders!.forEach((k, v) {
+          extraHeaders.forEach((k, v) {
             xhr.setRequestHeader(k, v);
           });
         }
@@ -175,7 +289,7 @@ class Request extends EventEmitter {
 
       if ('POST' == method) {
         try {
-          if (isBinary!) {
+          if (isBinary) {
             xhr.setRequestHeader('Content-type', 'application/octet-stream');
           } else {
             xhr.setRequestHeader('Content-type', 'text/plain;charset=UTF-8');
@@ -288,7 +402,7 @@ class Request extends EventEmitter {
 
     if (fromError != null) {
       try {
-        xhr!.abort();
+        xhr.abort();
       } catch (e) {
         // ignore
       }
@@ -306,14 +420,14 @@ class Request extends EventEmitter {
     try {
       var contentType;
       try {
-        contentType = xhr!.getResponseHeader('Content-Type');
+        contentType = xhr.getResponseHeader('Content-Type');
       } catch (e) {
         // ignore
       }
       if (contentType == 'application/octet-stream') {
-        data = xhr!.response ?? xhr!.responseText;
+        data = xhr.response ?? xhr.responseText;
       } else {
-        data = xhr!.responseText;
+        data = xhr.responseText;
       }
     } catch (e) {
       onError(e);

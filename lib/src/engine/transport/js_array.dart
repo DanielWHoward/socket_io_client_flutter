@@ -1,6 +1,7 @@
 // Copyright (C) 2020 Potix Corporation. All Rights Reserved
 // History: 2020/11/10 12:30 PM
 // Author: jumperchen<jumperchen@potix.com>
+/*
 @JS()
 library js_map;
 
@@ -17,3 +18,4 @@ class JsArray {
 @JS('self')
 // ignore: always_declare_return_types
 external get self;
+*/

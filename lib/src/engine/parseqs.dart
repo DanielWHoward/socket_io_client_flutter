@@ -29,6 +29,9 @@ String encode(Map obj) {
 ///
 Map decode(qs) {
   var qry = <dynamic, dynamic>{};
+  if (qs == '') {
+    return qry;
+  }
   var pairs = qs.split('&');
   for (var i = 0, l = pairs.length; i < l; i++) {
     var pair = pairs[i].split('=');
