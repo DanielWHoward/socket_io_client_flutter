@@ -37,7 +37,7 @@ import 'package:socket_io_client_flutter/socket_io_client.dart' as IO;
 
 main() {
   // Dart server
-  var io = new Server();
+  var io = Server();
   var nsp = io.of('/some');
   nsp.on('connection', (client) {
     print('connection /some');
