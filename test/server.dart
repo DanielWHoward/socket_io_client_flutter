@@ -8,7 +8,7 @@
 ///   26/07/2017, Created by jumperchen
 ///
 /// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
-import 'package:socket_io/socket_io.dart';
+import 'package:socket_io_client_flutter/socket_io.dart';
 
 void main() {
   // Dart server

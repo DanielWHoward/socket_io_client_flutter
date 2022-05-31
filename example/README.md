@@ -39,7 +39,7 @@ main() {
 **Dart Client**
 ```dart
 
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:socket_io_client_flutter/socket_io_client_flutter.dart' as IO;
 
 main() {
   // Dart client

@@ -23,7 +23,7 @@ class WebSocket {
 
 class WebSocketTransport extends Transport {
   static final Logger _logger =
-      Logger('socket_io_client:transport.WebSocketTransport');
+      Logger('socket_io_client_flutter:transport.WebSocketTransport');
 
   @override
   String name = 'websocket';

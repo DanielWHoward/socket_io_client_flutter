@@ -40,7 +40,7 @@ const List EVENTS = [
   'pong'
 ];
 
-final Logger _logger = Logger('socket_io_client:Socket');
+final Logger _logger = Logger('socket_io_client_flutter:Socket');
 
 ///
 /// `Socket` constructor.

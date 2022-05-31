@@ -19,7 +19,7 @@ import './transport/transports_stub.dart'
 // ignore: uri_does_not_exist
     if (dart.library.io) './transport/io_transports.dart';
 
-final Logger _logger = Logger('socket_io_client:engine.Socket');
+final Logger _logger = Logger('socket_io_client_flutter:engine.Socket');
 
 ///
 /// Socket constructor.

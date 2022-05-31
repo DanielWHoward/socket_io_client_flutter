@@ -1,5 +1,5 @@
 ///
-/// socket_io_client.dart
+/// socket_io_client_flutter.dart
 ///
 /// Purpose:
 ///
@@ -11,11 +11,11 @@
 /// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 ///
 
-library socket_io_client;
+library socket_io_client_flutter;
 
 import 'package:logging/logging.dart';
 import './src/socket.dart';
-import './src/engine/parser/parser.dart' as parser;
+import 'package:socket_io_common/src/engine/parser/parser.dart' as parser;
 import './src/engine/parseqs.dart';
 import './src/manager.dart';
 
@@ -27,7 +27,7 @@ final protocol = parser.protocol;
 
 final Map<String, dynamic> cache = {};
 
-final Logger _logger = Logger('socket_io_client');
+final Logger _logger = Logger('socket_io_client_flutter');
 
 ///
 /// Looks up an existing `Manager` for multiplexing.

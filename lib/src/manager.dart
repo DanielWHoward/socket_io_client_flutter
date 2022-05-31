@@ -12,7 +12,7 @@ import '../src/socket.dart';
 import '../src/engine/socket.dart' as engine_socket;
 import '../src/on.dart' as util;
 
-final Logger _logger = Logger('socket_io_client:Manager');
+final Logger _logger = Logger('socket_io_client_flutter:Manager');
 
 ///
 /// `Manager` constructor.
