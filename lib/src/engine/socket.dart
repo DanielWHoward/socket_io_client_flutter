@@ -37,7 +37,8 @@ class Socket extends EventEmitter {
   int port;
   Map query;
   bool upgrade;
-  String path;
+  dynamic path;
+  Function outOfBand;
   bool forceJSONP;
   bool jsonp;
   bool forceBase64;
@@ -68,6 +69,7 @@ class Socket extends EventEmitter {
 
   Socket(String uri, Map opts) {
     opts = opts ?? <dynamic, dynamic>{};
+    this.outOfBand = opts['outOfBand'] ?? (_) {};
 
     if (uri.isNotEmpty) {
       this.uri = Uri.parse(uri);
@@ -103,10 +105,13 @@ class Socket extends EventEmitter {
     }
 
     upgrade = opts['upgrade'] != false;
-    path = (opts['path'] ?? '/engine.io')
-            .toString()
-            .replaceFirst(RegExp(r'\/$'), '') +
-        '/';
+    path = opts['path'] ?? '/engine.io';
+    if (path is String) {
+      path = path
+              .toString()
+              .replaceFirst(RegExp(r'\/$'), '') +
+          '/';
+    }
     forceJSONP = opts['forceJSONP'] == true;
     jsonp = opts['jsonp'] != false;
     forceBase64 = opts['forceBase64'] == true;
@@ -283,6 +288,7 @@ class Socket extends EventEmitter {
 
     // set up transport listeners
     transport
+      ..on('outOfBand', (data) => onOutOfBand(data))
       ..on('drain', (_) => onDrain())
       ..on('packet', (packet) => onPacket(packet))
       ..on('error', (e) => onError(e))
@@ -524,6 +530,14 @@ class Socket extends EventEmitter {
   /// @api private
   void ping() {
     sendPacket(type: 'ping', callback: (_) => emit('ping'));
+  }
+
+  ///
+  /// Called on `outOfBand` event
+  ///
+  /// @api private
+  void onOutOfBand(data) {
+    this.outOfBand(data);
   }
 
   ///

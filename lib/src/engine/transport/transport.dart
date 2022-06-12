@@ -9,7 +9,7 @@ import '../../../src/engine/socket.dart';
 abstract class Transport extends EventEmitter {
   static final Logger _logger = Logger('socket_io_client_flutter:transport.Transport');
 
-  String path;
+  dynamic path;
   String hostname;
   int port;
   bool secure;
@@ -126,6 +126,12 @@ abstract class Transport extends EventEmitter {
   /// Called with a decoded packet.
   void onPacket(packet) {
     emit('packet', packet);
+  }
+
+  ///
+  /// Called with out of band data.
+  void outOfBand(data) {
+    emit('outOfBand', data);
   }
 
   ///
