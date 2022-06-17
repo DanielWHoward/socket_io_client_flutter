@@ -1,3 +1,7 @@
+# socket_io_client_flutter
+
+Port socket.io-client-dart 1.0.2 to Flutter without null safety, compatible with Flutter 1.22.6 (no null safety) and Flutter 3.0.2 (supports mixed null safety).  Add harmless long-polling extensions for xibbit.
+
 # socket.io-client-dart
 
 Port of awesome JavaScript Node.js library - [Socket.io-client v2.0.1~v3.0.3](https://github.com/socketio/socket.io-client) - in Dart
