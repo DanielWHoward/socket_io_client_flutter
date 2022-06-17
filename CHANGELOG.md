@@ -1,3 +1,9 @@
+## 1.0.2+2
+
+**Bug fix:**
+
+* Widen supported versions for socket_io_common, http and logging dependencies.
+
 ## 1.0.2+1
 
 **New Feature:**

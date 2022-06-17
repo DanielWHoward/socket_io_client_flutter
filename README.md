@@ -1,5 +1,20 @@
 # socket_io_client_flutter
 
+Now available as a Flutter package from [pub.dev](https://pub.dev/packages/socket_io_client_flutter).
+
+Now it can be included in pubspec.yaml as:
+
+```yaml
+dependencies:
+  socket_io_client_flutter: ^1.0.2
+```
+
+And in code as:
+
+```dart
+import 'package:socket_io_client_flutter/socket_io_client_flutter.dart';
+```
+
 Port socket.io-client-dart 1.0.2 to Flutter without null safety, compatible with Flutter 1.22.6 (no null safety) and Flutter 3.0.2 (supports mixed null safety).  Add harmless long-polling extensions for xibbit.
 
 # socket.io-client-dart
