@@ -1,4 +1,6 @@
-## 2.0.0
+## 1.2.0
+
+* Port socket.io-client-dart 2.0.0 to Flutter without null safety, compatible with Flutter 1.22.6 (no null safety) and Flutter 3.0.2 (supports mixed null safety).
 
 **New Feature:**
 

@@ -2,20 +2,31 @@
 
 Now available as a Flutter package from [pub.dev](https://pub.dev/packages/socket_io_client_flutter).
 
-Now it can be included in pubspec.yaml as:
+2.x.x version has sound null safety.  It can be included in pubspec.yaml as:
+
+```yaml
+dependencies:
+  socket_io_client_flutter: ^2.0.0
+```
+
+Dart 3 requires sound null safety and does not support no null safety and unsound (mixed) null safety.  Flutter versions that use Dart 3 will only work with socket_io_client_flutter 2.x.x.  Flutter versions that use Dart 2.12 and above should work with socket_io_client_flutter 2.x.x, too.
+
+1.x.x version does not have null safety and supports no null safety and unsound (mixed) null safety.  It can be included in pubspec.yaml as:
 
 ```yaml
 dependencies:
   socket_io_client_flutter: ^1.0.2
 ```
 
-And in code as:
+Dart 1 and Dart 2 require no null safety.  Dart 2.12 and above supports no null safety and both unsound (mixed) and sound null safety.  Some earlier Flutter versions that use Dart 2.12 and above run socket_io_client_flutter 1.x.x automatically but more recent Flutter versions that use Dart 2.12 and above require "--no-sound-null-safety" argument to run socket_io_client_flutter 1.x.x.
+
+Original release comment: Port socket.io-client-dart to Flutter without null safety, compatible with Flutter 1.22.6 (no null safety) and Flutter 3.0.2 (supports mixed null safety).  Add harmless long-polling extensions for xibbit.
+
+In 1.x.x and 2.x.x versions, it is included in code as:
 
 ```dart
 import 'package:socket_io_client_flutter/socket_io_client_flutter.dart';
 ```
-
-Port socket.io-client-dart 1.0.2 to Flutter without null safety, compatible with Flutter 1.22.6 (no null safety) and Flutter 3.0.2 (supports mixed null safety).  Add harmless long-polling extensions for xibbit.
 
 # socket.io-client-dart
 
