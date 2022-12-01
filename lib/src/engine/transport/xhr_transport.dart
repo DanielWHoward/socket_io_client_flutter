@@ -278,7 +278,7 @@ class Request extends EventEmitter {
       xhr.open(method, uri, asynch: asynch);
 
       try {
-        if (extraHeaders?.isNotEmpty == true) {
+        if ((extraHeaders != null) && (extraHeaders.isNotEmpty == true)) {
           extraHeaders.forEach((k, v) {
             xhr.setRequestHeader(k, v);
           });
@@ -396,7 +396,9 @@ class Request extends EventEmitter {
     // xmlhttprequest
     if (hasXDR()) {
     } else {
-      readyStateChange?.cancel();
+      if (readyStateChange != null) {
+        readyStateChange.cancel();
+      }
       readyStateChange = null;
     }
 

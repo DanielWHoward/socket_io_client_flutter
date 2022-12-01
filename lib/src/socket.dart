@@ -76,7 +76,7 @@ class Socket extends EventEmitter {
   ///
   /// @api private
   void subEvents() {
-    if (subs?.isEmpty == true) return;
+    if ((subs != null) && (subs.isEmpty == true)) return;
 //     if (subs?.isNotEmpty == true) return;
 
     var io = this.io;
@@ -150,7 +150,7 @@ class Socket extends EventEmitter {
       var packet = {
         'type': binary ? BINARY_EVENT : EVENT,
         'data': sendData,
-        'options': {'compress': flags?.isNotEmpty == true && flags['compress']}
+        'options': {'compress': flags != null && flags.isNotEmpty == true && flags['compress']}
       };
 
       // event ack callback
@@ -188,7 +188,7 @@ class Socket extends EventEmitter {
 
     // write connect packet if necessary
     if ('/' != nsp) {
-      if (query?.isNotEmpty == true) {
+      if ((query != null) && (query.isNotEmpty == true)) {
         packet({'type': CONNECT, 'query': query});
       } else {
         packet({'type': CONNECT});
@@ -373,7 +373,7 @@ class Socket extends EventEmitter {
   /// @api private.
 
   void destroy() {
-    if (subs?.isNotEmpty == true) {
+    if ((subs != null) && (subs.isNotEmpty == true)) {
       // clean subscriptions to avoid reconnections
       for (var i = 0; i < subs.length; i++) {
         subs[i].destroy();

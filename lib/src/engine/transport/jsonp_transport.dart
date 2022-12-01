@@ -18,6 +18,7 @@ import 'js_array.dart';
 /// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 
 var window;
+
 class ScriptElement {
   var async;
   var src;
@@ -25,6 +26,7 @@ class ScriptElement {
   var parentNode;
   remove() {}
 }
+
 class FormElement {
   var style;
   var action;
@@ -36,6 +38,7 @@ class FormElement {
   append(var x) {}
   setAttribute(var x, var y) {}
 }
+
 class IFrameElement {
   var name;
   var id;
@@ -43,16 +46,19 @@ class IFrameElement {
   var onLoad;
   remove() {}
 }
+
 class TextAreaElement {
   var name;
   var value;
 }
+
 class document {
   static var head;
   static var body;
   static createElement(String s) {}
   static getElementsByTagName(String s) {}
 }
+
 var context = {};
 
 ///
@@ -152,7 +158,9 @@ class JSONPTransport extends PollingTransport {
   void doPoll() {
     var script = document.createElement('script') as ScriptElement;
 
-    this.script?.remove();
+    if (this.script != null) {
+      this.script.remove();
+    }
     this.script = null;
 
     script.async = true;

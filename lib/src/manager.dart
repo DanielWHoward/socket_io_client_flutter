@@ -128,7 +128,9 @@ class Manager extends EventEmitter {
   num get randomizationFactor => _randomizationFactor;
   set randomizationFactor(num v) {
     _randomizationFactor = v;
-    backoff?.jitter = v;
+    if (backoff != null) {
+      backoff.jitter = v;
+    }
   }
 
   ///
@@ -141,7 +143,9 @@ class Manager extends EventEmitter {
   num get reconnectionDelayMax => _reconnectionDelayMax;
   set reconnectionDelayMax(num v) {
     _reconnectionDelayMax = v;
-    backoff?.max = v;
+    if (backoff != null) {
+      backoff.max = v;
+    }
   }
 
   ///
@@ -212,7 +216,7 @@ class Manager extends EventEmitter {
         emitAll('connect_timeout', timeout);
       });
 
-      subs.add(Destroyable(() => timer?.cancel()));
+      subs.add(Destroyable(() => timer.cancel()));
     }
 
     subs.add(openSub);

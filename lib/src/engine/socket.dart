@@ -276,7 +276,7 @@ class Socket extends EventEmitter {
   ///
   /// @api private
   void setTransport(transport) {
-    _logger.fine('setting transport ${transport?.name}');
+    _logger.fine('setting transport ${transport.name}');
 
     if (this.transport != null) {
       _logger.fine('clearing existing transport ${this.transport.name}');
@@ -328,7 +328,7 @@ class Socket extends EventEmitter {
           if (transport == null) return;
           priorWebsocketSuccess = 'websocket' == transport.name;
 
-          _logger.fine('pausing current transport "${transport?.name}"');
+          _logger.fine('pausing current transport "${transport.name}"');
           if (this.transport is PollingTransport) {
             (this.transport as PollingTransport).pause(() {
               if (failed) return;
@@ -386,7 +386,7 @@ class Socket extends EventEmitter {
     // When the socket is upgraded while we're probing
     var onupgrade = (to) {
       if (transport != null && to.name != transport.name) {
-        _logger.fine('"${to?.name}" works - aborting "${transport?.name}"');
+        _logger.fine('"${to.name}" works - aborting "${transport.name}"');
         freezeTransport();
       }
     };
@@ -501,7 +501,9 @@ class Socket extends EventEmitter {
   ///
   /// @api private
   void onHeartbeat(timeout) {
-    pingTimeoutTimer?.cancel();
+    if (pingTimeoutTimer != null) {
+      pingTimeoutTimer.cancel();
+    }
     pingTimeoutTimer = Timer(
         Duration(milliseconds: timeout ?? (pingInterval + pingTimeout)), () {
       if ('closed' == readyState) return;
@@ -515,7 +517,9 @@ class Socket extends EventEmitter {
   ///
   /// @api private
   void setPing() {
-    pingIntervalTimer?.cancel();
+    if (pingIntervalTimer != null) {
+      pingIntervalTimer.cancel();
+    }
     pingIntervalTimer = Timer(Duration(milliseconds: pingInterval), () {
       _logger
           .fine('writing ping packet - expecting pong within ${pingTimeout}ms');
@@ -685,8 +689,12 @@ class Socket extends EventEmitter {
       _logger.fine('socket close with reason: "$reason"');
 
       // clear timers
-      pingIntervalTimer?.cancel();
-      pingTimeoutTimer?.cancel();
+      if (pingIntervalTimer != null) {
+        pingIntervalTimer.cancel();
+      }
+      if (pingTimeoutTimer != null) {
+        pingTimeoutTimer.cancel();
+      }
 
       // stop event from firing again for transport
       transport.off('close');

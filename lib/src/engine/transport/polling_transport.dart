@@ -128,7 +128,7 @@ abstract class PollingTransport extends Transport {
 
     // decode payload
     self.decodePayload(data,
-        binaryType: socket?.binaryType != true, callback: callback);
+        binaryType: socket.binaryType != true, callback: callback);
 
     // if an event did not trigger closing
     if ('closed' != readyState) {
