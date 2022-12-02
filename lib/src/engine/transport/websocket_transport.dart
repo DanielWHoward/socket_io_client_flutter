@@ -3,15 +3,27 @@
 // Author: jumperchen<jumperchen@potix.com>
 
 import 'dart:async';
-import 'dart:html';
+// import 'dart:html';
 import 'package:logging/logging.dart';
-import 'package:socket_io_client/src/engine/transport/transport.dart';
-import 'package:socket_io_common/src/engine/parser/parser.dart';
-import 'package:socket_io_client/src/engine/parseqs.dart';
+import '../../../src/engine/transport/transport.dart';
+import '../../../src/socket_io_common_flutter/parser3.dart';
+import '../../../src/engine/parseqs.dart';
+
+class MessageEvent {
+  dynamic data;
+}
+
+class WebSocket {
+  dynamic binaryType = '';
+  dynamic onOpen, onClose, onError, onMessage;
+  WebSocket(uri, protocols) {}
+  send(dynamic msg) {}
+  close() {}
+}
 
 class WebSocketTransport extends Transport {
   static final Logger _logger =
-      Logger('socket_io_client:transport.WebSocketTransport');
+      Logger('socket_io_client_flutter:transport.WebSocketTransport');
 
   @override
   String? name = 'websocket';
@@ -85,7 +97,7 @@ class WebSocketTransport extends Transport {
     // encodePacket efficient as it uses WS framing
     // no need for encodePayload
     packets.forEach((packet) {
-      PacketParser.encodePacket(packet,
+      PacketParser3.encodePacket(packet,
           supportsBinary: supportsBinary, fromClient: true, callback: (data) {
         // Sometimes the websocket has already been closed but the browser didn't
         // have a chance of informing us about it yet, in that case send will

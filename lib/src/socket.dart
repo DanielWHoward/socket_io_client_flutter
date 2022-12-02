@@ -13,8 +13,8 @@ import 'dart:typed_data';
 /// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 import 'package:logging/logging.dart';
 import 'package:socket_io_common/src/util/event_emitter.dart';
-import 'package:socket_io_client/src/manager.dart';
-import 'package:socket_io_client/src/on.dart' as util;
+import '../src/manager.dart';
+import '../src/on.dart' as util;
 import 'package:socket_io_common/src/parser/parser.dart';
 
 ///
@@ -40,7 +40,7 @@ const List EVENTS = [
   'pong'
 ];
 
-final Logger _logger = Logger('socket_io_client:Socket');
+final Logger _logger = Logger('socket_io_client_flutter:Socket');
 
 ///
 /// `Socket` constructor.
@@ -59,7 +59,7 @@ class Socket extends EventEmitter {
   List sendBuffer = [];
   List receiveBuffer = [];
   String? query;
-  dynamic? auth;
+  dynamic auth;
   List? subs;
   Map flags = {};
   String? id;
@@ -253,6 +253,9 @@ class Socket extends EventEmitter {
       case CONNECT:
         if (packet['data'] != null && packet['data']['sid'] != null) {
           final id = packet['data']['sid'];
+          onconnect(id);
+        } else if (io.engine?.id != null) {
+          final id = io.engine?.id;
           onconnect(id);
         } else {
           emit('connect_error',

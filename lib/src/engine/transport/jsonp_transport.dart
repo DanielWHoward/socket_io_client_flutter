@@ -1,10 +1,10 @@
 import 'dart:async';
-import 'dart:html';
-import 'dart:js' hide JsArray;
-import 'package:js/js_util.dart';
-import 'package:socket_io_client/src/engine/transport/polling_transport.dart';
+// import 'dart:html';
+// import 'dart:js' hide JsArray;
+// import 'package:js/js_util.dart';
+import '../../../src/engine/transport/polling_transport.dart';
 
-import 'js_array.dart';
+// import 'js_array.dart';
 
 /// jsonp_transport.dart
 ///
@@ -16,6 +16,50 @@ import 'js_array.dart';
 ///   26/04/2017, Created by jumperchen
 ///
 /// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
+
+var window;
+
+class ScriptElement {
+  var async;
+  var src;
+  var onError;
+  var parentNode;
+  remove() {}
+}
+
+class FormElement {
+  var style;
+  var action;
+  var method;
+  var target;
+  var className;
+  remove() {}
+  submit() {}
+  append(var x) {}
+  setAttribute(var x, var y) {}
+}
+
+class IFrameElement {
+  var name;
+  var id;
+  var src;
+  var onLoad;
+  remove() {}
+}
+
+class TextAreaElement {
+  var name;
+  var value;
+}
+
+class document {
+  static var head;
+  static var body;
+  static createElement(String s) {}
+  static getElementsByTagName(String s) {}
+}
+
+var context = {};
 
 ///
 /// Cached regular expressions.
@@ -46,22 +90,31 @@ class JSONPTransport extends PollingTransport {
     // define global callbacks array if not present
     // we do this here (lazily) to avoid unneeded global pollution
     if (callbacks == null) {
+/*
       // we need to consider multiple engines in the same page
       if (getProperty(self, '___eio') == null) {
         setProperty(self, '___eio', JsArray());
       }
       callbacks = getProperty(self, '___eio');
+*/
+      if (context['___eio'] == null) context['___eio'] = [];
+      callbacks = context['___eio'];
     }
 
     // callback identifier
     index = callbacks.length;
 
     // add callback to jsonp global
+/*
     callMethod(callbacks, 'push', [
       allowInterop((msg) {
         onData(msg);
       })
     ]);
+*/
+    callbacks.add((msg) {
+      onData(msg);
+    });
 
     // append to query string
     query!['j'] = index;

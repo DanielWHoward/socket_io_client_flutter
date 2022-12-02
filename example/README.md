@@ -1,3 +1,7 @@
+# socket_io_client_flutter
+
+No example for socket_io_client_flutter.
+
 # socket.io-client-dart
 
 Port of awesome JavaScript Node.js library - [Socket.io-client v2.0.1~v3.0.3](https://github.com/socketio/socket.io-client) - in Dart
@@ -39,7 +43,7 @@ main() {
 **Dart Client**
 ```dart
 
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:socket_io_client_flutter/socket_io_client_flutter.dart' as IO;
 
 main() {
   // Dart client

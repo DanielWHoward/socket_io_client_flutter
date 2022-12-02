@@ -7,9 +7,9 @@ import 'dart:convert';
 
 import 'package:logging/logging.dart';
 import 'package:socket_io_common/src/util/event_emitter.dart';
-import 'package:socket_io_client/src/engine/parseqs.dart';
-import 'package:socket_io_common/src/engine/parser/parser.dart' as parser;
-import 'package:socket_io_client/src/engine/transport/polling_transport.dart';
+import '../../src/engine/parseqs.dart';
+import '../../src/socket_io_common_flutter/parser3.dart' as parser;
+import '../../src/engine/transport/polling_transport.dart';
 import './transport/transport.dart';
 
 // ignore: uri_does_not_exist
@@ -19,7 +19,7 @@ import './transport/transports_stub.dart'
 // ignore: uri_does_not_exist
     if (dart.library.io) './transport/io_transports.dart';
 
-final Logger _logger = Logger('socket_io_client:engine.Socket');
+final Logger _logger = Logger('socket_io_client_flutter:engine.Socket');
 
 ///
 /// Socket constructor.
@@ -37,7 +37,7 @@ class Socket extends EventEmitter {
   int? port;
   late Map query;
   bool? upgrade;
-  late String path;
+  late dynamic path;
   bool? forceJSONP;
   bool? jsonp;
   bool? forceBase64;
@@ -103,10 +103,13 @@ class Socket extends EventEmitter {
     }
 
     upgrade = opts['upgrade'] != false;
-    path = (opts['path'] ?? '/engine.io')
-            .toString()
-            .replaceFirst(RegExp(r'\/$'), '') +
-        '/';
+    path = opts['path'] ?? '/engine.io';
+    if (path is String) {
+      path = path
+              .toString()
+              .replaceFirst(RegExp(r'\/$'), '') +
+          '/';
+    }
     forceJSONP = opts['forceJSONP'] == true;
     jsonp = opts['jsonp'] != false;
     forceBase64 = opts['forceBase64'] == true;
@@ -171,7 +174,7 @@ class Socket extends EventEmitter {
   /// Protocol version.
   ///
   /// @api public
-  static int protocol = parser.protocol; // this is an int
+  static int protocol = parser.PacketParser3.protocol; // this is an int
 
 //
 //  Socket.Socket = Socket;
@@ -190,7 +193,7 @@ class Socket extends EventEmitter {
     var query = Map.from(this.query);
 
     // append engine.io protocol identifier
-    query['EIO'] = parser.protocol;
+    query['EIO'] = parser.PacketParser3.protocol;
 
     // transport name
     query['transport'] = name;
@@ -283,6 +286,7 @@ class Socket extends EventEmitter {
 
     // set up transport listeners
     transport
+      ..on('outOfBand', (data) => onOutOfBand(data))
       ..on('drain', (_) => onDrain())
       ..on('packet', (packet) => onPacket(packet))
       ..on('error', (e) => onError(e))
@@ -523,6 +527,15 @@ class Socket extends EventEmitter {
   // void ping() {
   //   sendPacket(type: 'ping', callback: (_) => emit('ping'));
   // }
+
+  ///
+  /// Called on `outOfBand` event
+  ///
+  /// @api private
+  void onOutOfBand(data) {
+    void Function(String) outOfBand = opts['outOfBand'] ?? (_) {};
+    outOfBand(data);
+  }
 
   ///
   /// Called on `drain` event

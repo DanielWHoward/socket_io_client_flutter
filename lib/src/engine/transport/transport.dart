@@ -2,14 +2,14 @@
 /// History: 2019-01-21 12:27
 /// Author: jumperchen<jumperchen@potix.com>
 import 'package:logging/logging.dart';
-import 'package:socket_io_common/src/engine/parser/parser.dart';
+import '../../../src/socket_io_common_flutter/parser3.dart';
 import 'package:socket_io_common/src/util/event_emitter.dart';
-import 'package:socket_io_client/src/engine/socket.dart';
+import '../../../src/engine/socket.dart';
 
 abstract class Transport extends EventEmitter {
-  static final Logger _logger = Logger('socket_io_client:transport.Transport');
+  static final Logger _logger = Logger('socket_io_client_flutter:transport.Transport');
 
-  late String path;
+  late dynamic path;
   late String hostname;
   int? port;
   late bool secure;
@@ -117,7 +117,7 @@ abstract class Transport extends EventEmitter {
   /// @param {String} data
   /// @api private
   void onData(data) {
-    var packet = PacketParser.decodePacket(data, socket!.binaryType);
+    var packet = PacketParser3.decodePacket(data, socket!.binaryType, false);
     onPacket(packet);
   }
 
@@ -125,6 +125,12 @@ abstract class Transport extends EventEmitter {
   /// Called with a decoded packet.
   void onPacket(packet) {
     emit('packet', packet);
+  }
+
+  ///
+  /// Called with out of band data.
+  void outOfBand(data) {
+    emit('outOfBand', data);
   }
 
   ///
