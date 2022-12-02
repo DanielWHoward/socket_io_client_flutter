@@ -1,5 +1,5 @@
 ///
-/// socket_io_client.dart
+/// socket_io_client_flutter.dart
 ///
 /// Purpose:
 ///
@@ -11,23 +11,25 @@
 /// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 ///
 
-library socket_io_client;
+library socket_io_client_flutter;
 
 import 'package:logging/logging.dart';
-import 'package:socket_io_client/src/socket.dart';
+import './src/socket.dart' as v4Socket;
 import 'package:socket_io_common/src/engine/parser/parser.dart' as parser;
-import 'package:socket_io_client/src/engine/parseqs.dart';
-import 'package:socket_io_client/src/manager.dart';
+import './src/engine/socket.dart' as eio;
+import './src/engine/parseqs.dart';
+import './src/manager.dart';
+import './v3/socket_io_client_flutter.dart';
 
-export 'package:socket_io_client/src/socket.dart';
-export 'package:socket_io_client/src/darty.dart';
+export './src/socket.dart';
+export './src/darty.dart';
 
 // Protocol version
 final protocol = parser.protocol;
 
 final Map<String, dynamic> cache = {};
 
-final Logger _logger = Logger('socket_io_client');
+final Logger _logger = Logger('socket_io_client_flutter');
 
 ///
 /// Looks up an existing `Manager` for multiplexing.
@@ -41,9 +43,9 @@ final Logger _logger = Logger('socket_io_client');
 ///
 /// @api public
 ///
-Socket io(uri, [opts]) => _lookup(uri, opts);
+v4Socket.Socket io(uri, [opts]) => _lookup(uri, opts);
 
-Socket _lookup(uri, opts) {
+v4Socket.Socket _lookup(uri, opts) {
   opts = opts ?? <dynamic, dynamic>{};
 
   var parsed = Uri.parse(uri);
@@ -68,5 +70,33 @@ Socket _lookup(uri, opts) {
   } else if (opts != null && opts['query'] is Map) {
     opts['query'] = encode(opts['query']);
   }
-  return io.socket(parsed.path.isEmpty ? '/' : parsed.path, opts);
+  String nsp = parsed.path.isEmpty ? '/' : parsed.path;
+  if (opts.containsKey('nsp')) {
+    nsp = opts['nsp'];
+  }
+  return io.socket(nsp, opts);
+}
+
+/**
+ These versions are super confusing and obnoxious.
+ socket.io-client protocol 5 uses engine.io protocol 4
+ socket.io-client protocol 4 uses engine.io protocol 3
+ Internally, just call it by the engine.io version
+ On export, rename v4 to v5 and v3 to v4
+ */
+const v5 = {
+  'eio': eio.Socket,
+  'eio_protocol': 4,
+  'protocol': 5,
+  'Manager': Manager,
+  'Socket': v4Socket.Socket,
+  'io': io,
+  'connect': io,
+};
+const versions = [
+  v5,
+  v4,
+];
+getEioProtocolVersion(int v) {
+  return versions.firstWhere((el) => (el['eio_protocol'] == v));
 }

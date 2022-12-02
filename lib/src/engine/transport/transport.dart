@@ -4,10 +4,10 @@
 import 'package:logging/logging.dart';
 import 'package:socket_io_common/src/engine/parser/parser.dart';
 import 'package:socket_io_common/src/util/event_emitter.dart';
-import 'package:socket_io_client/src/engine/socket.dart';
+import '../../../src/engine/socket.dart';
 
 abstract class Transport extends EventEmitter {
-  static final Logger _logger = Logger('socket_io_client:transport.Transport');
+  static final Logger _logger = Logger('socket_io_client_flutter:transport.Transport');
 
   late String path;
   late String hostname;

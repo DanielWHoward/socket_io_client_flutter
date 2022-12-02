@@ -2,14 +2,125 @@
 // History:  27/04/2017
 // Author: jumperchen<jumperchen@potix.com>
 import 'dart:async';
-import 'dart:html';
+// import 'dart:html';
 
 import 'dart:typed_data';
 import 'package:logging/logging.dart';
+import 'package:http/http.dart' as http;
 import 'package:socket_io_common/src/util/event_emitter.dart';
-import 'package:socket_io_client/src/engine/transport/polling_transport.dart';
+import '../../../src/engine/transport/polling_transport.dart';
 
-final Logger _logger = Logger('socket_io_client:transport.XHRTransport');
+final Logger _logger = Logger('socket_io_client_flutter:transport.XHRTransport');
+
+class FlutterHttpRequestStreamSubscription extends StreamSubscription {
+  @override
+  Future<E> asFuture<E>([E? futureValue]) {
+    return Future(() => (null as E));
+  }
+  @override
+  Future cancel() {
+    return Future(() => null);
+  }
+  @override
+  bool get isPaused => false;
+  @override
+  void onData(void Function(dynamic data)? handleData) {}
+  @override
+  void onDone(void Function()? handleDone) {}
+  @override
+  void onError(Function? handleError) {}
+  @override
+  void pause([Future? resumeSignal]) {}
+  @override
+  void resume() {}
+}
+
+typedef HttpRequestCallback = Null Function(dynamic);
+
+class FlutterEvent {}
+
+class FlutterHttpRequestStream /*extends Stream<FlutterEvent>*/ {
+  late FlutterHttpRequest req;
+  HttpRequestCallback? listener;
+  FlutterHttpRequestStream();
+  StreamSubscription listen(HttpRequestCallback onData,
+      {Function? onError, void onDone()?, bool? cancelOnError}) {
+    this.listener = onData;
+    return FlutterHttpRequestStreamSubscription();
+  }
+}
+
+class FlutterHttpRequest {
+  Future<http.Response>? future;
+  String? method;
+  String? url;
+  static Map<String, String> headers = Map<String, String>();
+  var timeout;
+  var onload;
+  var onerror;
+  var readyState = -1;
+  var onReadyStateChange = FlutterHttpRequestStream();
+  var responseType;
+  var status;
+  var responseText;
+  ByteBuffer? response;
+  Map<String, String> responseHeaders = {};
+  FlutterHttpRequest() {
+    onReadyStateChange.req = this;
+  }
+  open(String method, String url, {bool asynch=false, String user='', String password=''}) {
+    this.method = method;
+    this.url = url;
+  }
+  abort() {}
+  setRequestHeader(String key, String value) {
+    headers[key] = value;
+  }
+  Future<http.Response> send(var data) {
+    var self = this;
+    try {
+      if (method == 'GET') {
+        _logger.fine('FlutterHttpRequest ${method} ${url}');
+        future = http.get(Uri.parse(url!), headers: headers);
+      } else if (method == 'POST') {
+        _logger.fine('FlutterHttpRequest ${method} ${url} ${data}');
+        future = http.post(Uri.parse(url!), headers: headers, body: data);
+      }
+      future?.then((response) {
+        if (response.headers['set-cookie'] != null) {
+          headers['cookie'] = response.headers['set-cookie'] ?? '';
+        }
+        responseText = response.body;
+        status = response.statusCode;
+        _logger.fine(
+            'FlutterHttpRequest ${method} ${status} ${url} ${data} ${responseText}');
+        Map event = {'target': self};
+        readyState = 2;
+        responseHeaders = response.headers;
+        onReadyStateChange.listener!(event);
+        if (responseType == 'arraybuffer') {
+          this.response = response.bodyBytes.buffer;
+        }
+        readyState = 4;
+        onReadyStateChange.listener!(event);
+      });
+      return future!;
+    } catch (e) {
+      onerror(e);
+      return future!;
+    }
+  }
+  String getResponseHeader(String typ) {
+    for (String key in responseHeaders.keys) {
+      if (key.toLowerCase() == typ.toLowerCase()) {
+        return responseHeaders[key] ?? '';
+      }
+    }
+    return '';
+  }
+}
+
+class HttpRequest extends FlutterHttpRequest {}
 
 class XHRTransport extends PollingTransport {
   // int? requestTimeout;
@@ -28,15 +139,18 @@ class XHRTransport extends PollingTransport {
     // requestTimeout = opts['requestTimeout'];
     extraHeaders = opts['extraHeaders'] ?? <String, dynamic>{};
 
-    var isSSL = 'https:' == window.location.protocol;
-    var port = window.location.port;
+    var window = {
+      'location': {'hostname': '', 'protocol': 'https', 'port': '443'}
+    };
+    var isSSL = 'https:' == window['location']!['protocol'];
+    var port = window['location']!['port'];
 
     // some user agents have empty `location.port`
-    if (port.isEmpty) {
+    if (port!.isEmpty) {
       port = isSSL ? '443' : '80';
     }
 
-    xd = opts['hostname'] != window.location.hostname ||
+    xd = opts['hostname'] != window['location']!['hostname'] ||
         int.parse(port) != opts['port'];
     xs = opts['secure'] != isSSL;
   }
@@ -120,7 +234,7 @@ class Request extends EventEmitter {
   late String uri;
   late bool xd;
   late bool xs;
-  late bool async;
+  late bool asynch;
   late var data;
   late bool agent;
   bool? isBinary;
@@ -137,7 +251,7 @@ class Request extends EventEmitter {
     uri = opts['uri'];
     xd = opts['xd'] == true;
     xs = opts['xs'] == true;
-    async = opts['async'] != false;
+    asynch = opts['async'] != false;
     data = opts['data'];
     agent = opts['agent'];
     isBinary = opts['isBinary'];
@@ -161,7 +275,7 @@ class Request extends EventEmitter {
 
     try {
       _logger.fine('xhr open $method: $uri');
-      xhr.open(method, uri, async: async);
+      xhr.open(method, uri, asynch: asynch);
 
       try {
         if (extraHeaders?.isNotEmpty == true) {

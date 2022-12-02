@@ -2,6 +2,24 @@
 
 **New Feature:**
 
+* Port null-safe socket.io-client-dart 2.0.0 to null-safe socket_io_client_flutter 2.0.0.  Port socket_io_common 1.x.x EIO=3 PacketParser to socket_io_client_flutter as PacketParser3 to replace socket_io_common 2.x.x EIO=4 PacketParser.
+
+## 1.2.0+1
+
+**Bug fix:**
+
+* Narrow socket_io_common version in pubspec.yaml.
+
+## 1.2.0
+
+**Bug fix:**
+
+* Update no null-safety socket_io_client_flutter with latest socket.io-client-dart commits.
+
+## 2.0.0
+
+**New Feature:**
+
 * [#237](https://github.com/rikulo/socket.io-client-dart/pull/237) Allow sending an ack with multiple data items (making it consistent with emit)
 
 ## 1.0.2
@@ -80,10 +98,46 @@
 * [#130](https://github.com/rikulo/socket.io-client-dart/issues/130) Cannot connect to socket.io V3
 * [#106](https://github.com/rikulo/socket.io-client-dart/issues/106) Can we combine emitWithBinary to emit?
 
+**New Feature:**
+
+* [#132](https://github.com/rikulo/socket.io-client-dart/issues/132) Migrating to null safety for Dart
+
+## 1.0.2+2
+
+**Bug fix:**
+
+* Widen supported versions for socket_io_common, http and logging dependencies.
+
+## 1.0.2+1
+
+**New Feature:**
+
+* Port socket.io-client-dart 1.0.2 to Flutter without null safety, compatible with Flutter 1.22.6 (no null safety) and Flutter 3.0.2 (supports mixed null safety).  Add harmless long-polling extensions for xibbit.
+
+## 1.0.2
+
+**New Feature:**
+
+* [#237](https://github.com/rikulo/socket.io-client-dart/pull/237) Allow sending an ack with multiple data items (making it consistent with emit)
+
+## 1.0.1
+
+**Bug fix:**
+
+* [#188](https://github.com/rikulo/socket.io-client-dart/pull/188) Fixbug for Backoff when many attempts: "UnsupportedError: Unsupported operation: Infinity or NaN toInt"
+
+## 1.0.0
+
+**New Feature:**
+
+* [#48](https://github.com/DanielWHoward/socket_io_client_flutter/issues/1) change code for Flutter
+
+## 1.0.0-nullsafety.0
 
 **New Feature:**
 
 * [#132](https://github.com/rikulo/socket.io-client-dart/issues/132) Migrating to null safety for Dart
+
 
 ## 0.9.12
 

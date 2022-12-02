@@ -11,7 +11,7 @@ import 'dart:async';
  *
  * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
  */
-import 'package:socket_io_client/socket_io_client.dart' as io;
+import 'package:socket_io_client_flutter/socket_io_client_flutter.dart' as io;
 
 void main() {
   var socket = io.io('http://localhost:3000');
