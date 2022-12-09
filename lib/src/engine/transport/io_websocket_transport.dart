@@ -59,15 +59,13 @@ class IOWebSocketTransport extends Transport {
   /// @api private
   void addEventListeners() {
     var isOpen = false;
-    if (ws != null) {
-      ws.listen((data) {
-        if (isOpen != true) {
-          onOpen();
-          isOpen = true;
-        }
-        onData(data);
-      }, onDone: () => onClose(), onError: (_) => onError('websocket error'));
-    }
+    ws.listen((data) {
+      if (isOpen != true) {
+        onOpen();
+        isOpen = true;
+      }
+      onData(data);
+    }, onDone: () => onClose(), onError: (_) => onError('websocket error'));
   }
 
   /// Writes data to socket.
@@ -100,12 +98,10 @@ class IOWebSocketTransport extends Transport {
         // throw an error
         try {
           // TypeError is thrown when passing the second argument on Safari
-          if (ws != null) {
-            if (data is ByteBuffer) {
-              ws.add(data.asUint8List());
-            } else {
-              ws.add(data);
-            }
+          if (data is ByteBuffer) {
+            ws.add(data.asUint8List());
+          } else {
+            ws.add(data);
           }
         } catch (e) {
           _logger.fine('websocket closed before onclose event');
@@ -122,9 +118,7 @@ class IOWebSocketTransport extends Transport {
   /// @api private
   @override
   void doClose() {
-    if (ws != null) {
-      ws.close();
-    }
+    ws.close();
   }
 
   ///

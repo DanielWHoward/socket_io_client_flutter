@@ -4,7 +4,7 @@ import 'dart:async';
 // import 'package:js/js_util.dart';
 import '../../../src/engine/transport/polling_transport.dart';
 
-import 'js_array.dart';
+// import 'js_array.dart';
 
 /// jsonp_transport.dart
 ///

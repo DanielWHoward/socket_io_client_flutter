@@ -44,7 +44,6 @@ Port of awesome JavaScript Node.js library - [Socket.io-client v2.0.1~v3.0.3](ht
 **Dart Server**
 ```dart
 import 'package:socket_io/socket_io.dart';
-import 'package:socket_io_client_flutter/socket_io_client.dart' as IO;
 
 main() {
   // Dart server
@@ -253,7 +252,7 @@ class BuildWithSocketStream extends StatelessWidget {
 ```dart
 class MyHttpOverrides extends HttpOverrides {
   @override
-  HttpClient createHttpClient(SecurityContext context) {
+  HttpClient createHttpClient(SecurityContext? context) {
     return super.createHttpClient(context)
       ..badCertificateCallback =
           (X509Certificate cert, String host, int port) => true;
@@ -313,5 +312,7 @@ If you are new to Git or GitHub, please read [this guide](https://help.github.co
 - Thanks [@bruce3x](https://github.com/bruce3x) for https://github.com/rikulo/socket.io-client-dart/issues/25
 - Thanks [@Kavantix](https://github.com/Kavantix) for https://github.com/rikulo/socket.io-client-dart/issues/26
 - Thanks [@luandnguyen](https://github.com/luandnguyen) for https://github.com/rikulo/socket.io-client-dart/issues/59
+- Thanks [@jorgefspereira](https://github.com/jorgefspereira) for https://github.com/rikulo/socket.io-client-dart/pull/177
 - Thanks [@fzyzcjy](https://github.com/fzyzcjy) for https://github.com/rikulo/socket.io-client-dart/pull/188
+- Thanks [@darwin-morocho](https://github.com/darwin-morocho) for https://github.com/rikulo/socket.io-client-dart/pull/189
 - Thanks [@chatziko](https://github.com/chatziko) for https://github.com/rikulo/socket.io-client-dart/pull/237

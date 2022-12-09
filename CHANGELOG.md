@@ -1,10 +1,106 @@
+## 2.0.0
+
+**New Feature:**
+
+* Port null-safe socket.io-client-dart 2.0.0 to null-safe socket_io_client_flutter 2.0.0.  Port socket_io_common 1.x.x EIO=3 PacketParser to socket_io_client_flutter as PacketParser3 to replace socket_io_common 2.x.x EIO=4 PacketParser.
+
+## 1.2.0+1
+
+**Bug fix:**
+
+* Narrow socket_io_common version in pubspec.yaml.
+
 ## 1.2.0
 
-* Port socket.io-client-dart 2.0.0 to Flutter without null safety, compatible with Flutter 1.22.6 (no null safety) and Flutter 3.0.2 (supports mixed null safety).
+**Bug fix:**
+
+* Update no null-safety socket_io_client_flutter with latest socket.io-client-dart commits.
+
+## 2.0.0
 
 **New Feature:**
 
 * [#237](https://github.com/rikulo/socket.io-client-dart/pull/237) Allow sending an ack with multiple data items (making it consistent with emit)
+
+## 1.0.2
+
+**New Feature:**
+
+* [#237](https://github.com/rikulo/socket.io-client-dart/pull/237) Allow sending an ack with multiple data items (making it consistent with emit)
+
+## 1.0.1
+
+**Bug fix:**
+
+* [#188](https://github.com/rikulo/socket.io-client-dart/pull/188) Fixbug for Backoff when many attempts: "UnsupportedError: Unsupported operation: Infinity or NaN toInt"
+
+## 2.0.0-beta.4-nullsafety.0
+
+**New Feature:**
+
+* [#177](https://github.com/rikulo/socket.io-client-dart/pull/177) Send credentials with the auth option
+
+**Bug fix:**
+
+* [#172](https://github.com/rikulo/socket.io-client-dart/issues/172) socket id's not synced
+
+## 2.0.0-beta.3-nullsafety.0
+
+**New Feature:**
+
+* [#163](https://github.com/rikulo/socket.io-client-dart/issues/163) Null safety support for 2.0.0-beta
+
+## 2.0.0-beta.3
+
+**Bug fix:**
+
+* [#150](https://github.com/rikulo/socket.io-client-dart/issues/150) Problem with setQuery in socket io version 3.0
+
+## 2.0.0-beta.2
+
+**Bug fix:**
+
+* [#140](https://github.com/rikulo/socket.io-client-dart/issues/140) getting Error on emitWithAck() in v2 beta
+
+## 2.0.0-beta.1
+
+**New Feature:**
+
+* [#130](https://github.com/rikulo/socket.io-client-dart/issues/130) Cannot connect to socket.io V3
+* [#106](https://github.com/rikulo/socket.io-client-dart/issues/106) Can we combine emitWithBinary to emit?
+
+## 1.0.0
+
+* [#172](https://github.com/rikulo/socket.io-client-dart/issues/172) socket id's not synced
+
+## 2.0.0-beta.3-nullsafety.0
+
+**New Feature:**
+
+* [#163](https://github.com/rikulo/socket.io-client-dart/issues/163) Null safety support for 2.0.0-beta
+
+## 2.0.0-beta.3
+
+**Bug fix:**
+
+* [#150](https://github.com/rikulo/socket.io-client-dart/issues/150) Problem with setQuery in socket io version 3.0
+
+## 2.0.0-beta.2
+
+**Bug fix:**
+
+* [#140](https://github.com/rikulo/socket.io-client-dart/issues/140) getting Error on emitWithAck() in v2 beta
+
+## 2.0.0-beta.1
+
+**New Feature:**
+
+* [#130](https://github.com/rikulo/socket.io-client-dart/issues/130) Cannot connect to socket.io V3
+* [#106](https://github.com/rikulo/socket.io-client-dart/issues/106) Can we combine emitWithBinary to emit?
+
+**New Feature:**
+
+* [#132](https://github.com/rikulo/socket.io-client-dart/issues/132) Migrating to null safety for Dart
 
 ## 1.0.2+2
 

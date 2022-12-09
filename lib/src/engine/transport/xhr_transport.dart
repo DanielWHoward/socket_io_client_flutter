@@ -15,14 +15,14 @@ final Logger _logger = Logger('socket_io_client_flutter:transport.XHRTransport')
 class FlutterHttpRequestStreamSubscription extends StreamSubscription {
   @override
   Future<E> asFuture<E>([E futureValue]) {
-    return null;
+    return Future(() => (null));
   }
   @override
   Future cancel() {
-    return null;
+    return Future(() => null);
   }
   @override
-  bool get isPaused => null;
+  bool get isPaused => false;
   @override
   void onData(void Function(dynamic data) handleData) {}
   @override
@@ -40,7 +40,7 @@ typedef HttpRequestCallback = Null Function(dynamic);
 class FlutterEvent {}
 
 class FlutterHttpRequestStream /*extends Stream<FlutterEvent>*/ {
-  HttpRequest req;
+  FlutterHttpRequest req;
   HttpRequestCallback listener;
   FlutterHttpRequestStream();
   StreamSubscription listen(HttpRequestCallback onData,
@@ -51,7 +51,7 @@ class FlutterHttpRequestStream /*extends Stream<FlutterEvent>*/ {
 }
 
 class FlutterHttpRequest {
-  Future future;
+  Future<http.Response> future;
   String method;
   String url;
   static Map<String, String> headers = Map<String, String>();
@@ -68,7 +68,7 @@ class FlutterHttpRequest {
   FlutterHttpRequest() {
     onReadyStateChange.req = this;
   }
-  open(String method, String url, {bool asynch, String user, String password}) {
+  open(String method, String url, {bool asynch: false, String user: '', String password: ''}) {
     this.method = method;
     this.url = url;
   }
@@ -96,7 +96,7 @@ class FlutterHttpRequest {
             'FlutterHttpRequest ${method} ${status} ${url} ${data} ${responseText}');
         Map event = {'target': self};
         readyState = 2;
-        responseHeaders = response.headers as Map<String, String>;
+        responseHeaders = response.headers;
         onReadyStateChange.listener(event);
         if (responseType == 'arraybuffer') {
           this.response = response.bodyBytes.buffer;
@@ -107,16 +107,16 @@ class FlutterHttpRequest {
       return future;
     } catch (e) {
       onerror(e);
-      return null;
+      return future;
     }
   }
   String getResponseHeader(String typ) {
     for (String key in responseHeaders.keys) {
       if (key.toLowerCase() == typ.toLowerCase()) {
-        return responseHeaders[key];
+        return responseHeaders[key] ?? '';
       }
     }
-    return null;
+    return '';
   }
 }
 

@@ -38,7 +38,6 @@ class Socket extends EventEmitter {
   Map query;
   bool upgrade;
   dynamic path;
-  Function outOfBand;
   bool forceJSONP;
   bool jsonp;
   bool forceBase64;
@@ -69,7 +68,6 @@ class Socket extends EventEmitter {
 
   Socket(String uri, Map opts) {
     opts = opts ?? <dynamic, dynamic>{};
-    this.outOfBand = opts['outOfBand'] ?? (_) {};
 
     if (uri.isNotEmpty) {
       this.uri = Uri.parse(uri);
@@ -541,7 +539,8 @@ class Socket extends EventEmitter {
   ///
   /// @api private
   void onOutOfBand(data) {
-    this.outOfBand(data);
+    var outOfBand = opts['outOfBand'] ?? (_) {};
+    outOfBand(data);
   }
 
   ///

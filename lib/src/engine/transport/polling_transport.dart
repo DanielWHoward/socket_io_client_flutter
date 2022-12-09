@@ -188,9 +188,12 @@ abstract class PollingTransport extends Transport {
       // find packets
       var pos = data.indexOf(':');
       while (pos != -1) {
-        if ((pos > 0) && (pos < (data.length - 1))
-            && (data[pos-1].compareTo('0') != -1) && (data[pos-1].compareTo('9') != 1)
-            && (data[pos+1].compareTo('0') != -1) && (data[pos+1].compareTo('9') != 1)) {
+        if ((pos > 0) &&
+            (pos < (data.length - 1)) &&
+            (data[pos - 1].compareTo('0') != -1) &&
+            (data[pos - 1].compareTo('9') != 1) &&
+            (data[pos + 1].compareTo('0') != -1) &&
+            (data[pos + 1].compareTo('9') != 1)) {
           matchPos.add(pos);
         }
         pos = data.indexOf(':', pos + 1);
@@ -205,7 +208,9 @@ abstract class PollingTransport extends Transport {
       for (var m=0; m < matchPos.length; ++m) {
         start = matchPos[m] - del - 1;
         end = start + 1;
-        while ((start >= 0) && (data[start].compareTo('0') != -1) && (data[start].compareTo('9') != 1)) {
+        while ((start >= 0) &&
+            (data[start].compareTo('0') != -1) &&
+            (data[start].compareTo('9') != 1)) {
           len = int.parse(data.substring(start, end));
           // heuristic to ignore extra outOfBand digit
           heur = data.length;

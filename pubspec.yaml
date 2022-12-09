@@ -1,21 +1,20 @@
 name: socket_io_client_flutter
 description: Flutter port of socket.io-client for web, flutter, dartvm to use
-version: 1.2.0
+version: 1.2.0+1
 homepage: https://xibbit.github.io
 repository: https://github.com/DanielWHoward/socket_io_client_flutter
 issue_tracker: https://github.com/DanielWHoward/socket_io_client_flutter/issues
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
-  flutter: ">=1.17.0"
+  sdk: '>=2.7.0 <3.0.0'
+  flutter: '>=1.17.0'
 
 dependencies:
   flutter:
     sdk: flutter
-  socket_io_common: '>=0.9.2 <3.0.0'
-  http: '>=0.12.2 <2.0.0'
   logging: '>=0.11.4 <2.0.0'
-
+  socket_io_common: '>=0.9.2 <2.0.0'
+  http: '>=0.12.2 <1.0.0'
 
 dev_dependencies:
   flutter_test:

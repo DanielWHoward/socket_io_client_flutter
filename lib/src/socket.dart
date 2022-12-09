@@ -59,7 +59,7 @@ class Socket extends EventEmitter {
   List sendBuffer = [];
   List receiveBuffer = [];
   String query;
-  List subs;
+  List subs = [];
   Map flags;
   String id;
 
@@ -76,8 +76,7 @@ class Socket extends EventEmitter {
   ///
   /// @api private
   void subEvents() {
-    if ((subs != null) && (subs.isEmpty == true)) return;
-//     if (subs?.isNotEmpty == true) return;
+    if (subs.isNotEmpty == true) return;
 
     var io = this.io;
     subs = [
@@ -87,6 +86,11 @@ class Socket extends EventEmitter {
     ];
   }
 
+  /// Whether the Socket will try to reconnect when its Manager connects or reconnects
+  bool get active {
+    return subs != null;
+  }
+
   ///
   /// "Opens" the socket.
   ///
@@ -94,7 +98,7 @@ class Socket extends EventEmitter {
   Socket open() => connect();
 
   Socket connect() {
-    if (connected == true) return this;
+    if (connected) return this;
     subEvents();
     io.open(); // ensure open
     if ('open' == io.readyState) onopen();

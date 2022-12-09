@@ -119,9 +119,7 @@ class WebSocketTransport extends Transport {
   /// @api private
   @override
   void doClose() {
-    if (ws != null) {
-      ws.close();
-    }
+    ws.close();
   }
 
   /// Generates uri for connection.

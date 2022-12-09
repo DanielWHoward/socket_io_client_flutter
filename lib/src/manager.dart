@@ -44,6 +44,14 @@ class Manager extends EventEmitter {
   /// @api public
   ///
   num _reconnectionAttempts;
+
+  ///
+  /// Sets the delay between reconnections.
+  ///
+  /// @param {Number} delay
+  /// @return {Manager} self or value
+  /// @api public
+  ///
   num _reconnectionDelay;
   num _randomizationFactor;
   num _reconnectionDelayMax;
