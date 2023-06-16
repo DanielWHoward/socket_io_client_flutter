@@ -6,7 +6,7 @@ import 'dart:async';
 // import 'dart:html';
 import 'package:logging/logging.dart';
 import '../../../src/engine/transport/transport.dart';
-import '../../../src/socket_io_common_flutter/parser3.dart';
+import '../../../socket_io_common/src/engine/parser/parser.dart';
 import '../../../src/engine/parseqs.dart';
 
 class MessageEvent {
@@ -27,7 +27,7 @@ class WebSocketTransport extends Transport {
 
   @override
   String? name = 'websocket';
-  late var protocols;
+  var protocols;
 
   @override
   bool? supportsBinary;
@@ -97,7 +97,7 @@ class WebSocketTransport extends Transport {
     // encodePacket efficient as it uses WS framing
     // no need for encodePayload
     packets.forEach((packet) {
-      PacketParser3.encodePacket(packet,
+      PacketParser.encodePacket(packet,
           supportsBinary: supportsBinary, fromClient: true, callback: (data) {
         // Sometimes the websocket has already been closed but the browser didn't
         // have a chance of informing us about it yet, in that case send will
@@ -119,7 +119,7 @@ class WebSocketTransport extends Transport {
   /// @api private
   @override
   void doClose() {
-    ws?.close();
+    ws!.close();
   }
 
   /// Generates uri for connection.

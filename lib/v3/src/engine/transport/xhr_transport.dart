@@ -7,7 +7,7 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'package:logging/logging.dart';
 import 'package:http/http.dart' as http;
-import 'package:socket_io_common/src/util/event_emitter.dart';
+import '../../../socket_io_common/src/util/event_emitter.dart';
 import '../../../src/engine/transport/polling_transport.dart';
 
 final Logger _logger = Logger('socket_io_client_flutter:transport.XHRTransport');
@@ -15,7 +15,7 @@ final Logger _logger = Logger('socket_io_client_flutter:transport.XHRTransport')
 class FlutterHttpRequestStreamSubscription extends StreamSubscription {
   @override
   Future<E> asFuture<E>([E? futureValue]) {
-    return Future(() => (null as E));
+    return Future(() => null as E);
   }
   @override
   Future cancel() {
@@ -86,7 +86,7 @@ class FlutterHttpRequest {
         _logger.fine('FlutterHttpRequest ${method} ${url} ${data}');
         future = http.post(Uri.parse(url!), headers: headers, body: data);
       }
-      future?.then((response) {
+      future!.then((response) {
         if (response.headers['set-cookie'] != null) {
           headers['cookie'] = response.headers['set-cookie'] ?? '';
         }
@@ -199,7 +199,7 @@ class XHRTransport extends PollingTransport {
   void doWrite(data, fn) {
     var isBinary = data is! String;
     var req = request({'method': 'POST', 'data': data, 'isBinary': isBinary});
-    req.on('data', fn);
+    req.on('success', fn);
     req.on('error', (err) {
       onError('xhr post error', err);
     });
@@ -237,7 +237,7 @@ class Request extends EventEmitter {
   late bool asynch;
   late var data;
   late bool agent;
-  bool? isBinary;
+  late bool isBinary;
   late bool supportsBinary;
   late bool enablesXDR;
   // late int requestTimeout;
@@ -278,7 +278,7 @@ class Request extends EventEmitter {
       xhr.open(method, uri, asynch: asynch);
 
       try {
-        if (extraHeaders?.isNotEmpty == true) {
+        if ((extraHeaders != null) && (extraHeaders!.isNotEmpty == true)) {
           extraHeaders!.forEach((k, v) {
             xhr.setRequestHeader(k, v);
           });
@@ -289,7 +289,7 @@ class Request extends EventEmitter {
 
       if ('POST' == method) {
         try {
-          if (isBinary!) {
+          if (isBinary) {
             xhr.setRequestHeader('Content-type', 'application/octet-stream');
           } else {
             xhr.setRequestHeader('Content-type', 'text/plain;charset=UTF-8');
@@ -396,7 +396,9 @@ class Request extends EventEmitter {
     // xmlhttprequest
     if (hasXDR()) {
     } else {
-      readyStateChange?.cancel();
+      if (readyStateChange != null) {
+        readyStateChange!.cancel();
+      }
       readyStateChange = null;
     }
 

@@ -12,10 +12,10 @@ import 'dart:typed_data';
 ///
 /// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 import 'package:logging/logging.dart';
-import 'package:socket_io_common/src/util/event_emitter.dart';
+import '../socket_io_common/src/util/event_emitter.dart';
 import '../src/manager.dart';
 import '../src/on.dart' as util;
-import 'package:socket_io_common/src/parser/parser.dart';
+import '../socket_io_common/src/parser/parser.dart';
 
 ///
 /// Internal events (blacklisted).
@@ -59,16 +59,14 @@ class Socket extends EventEmitter {
   List sendBuffer = [];
   List receiveBuffer = [];
   String? query;
-  dynamic auth;
-  List? subs;
-  Map flags = {};
+  List? subs = [];
+  Map? flags = {};
   String? id;
 
   Socket(this.io, this.nsp, this.opts) {
     json = this; // compat
     if (opts != null) {
       query = opts!['query'];
-      auth = opts!['auth'];
     }
     if (io.autoConnect) open();
   }
@@ -78,13 +76,12 @@ class Socket extends EventEmitter {
   ///
   /// @api private
   void subEvents() {
-    if (subs?.isNotEmpty == true) return;
+    if (subs!.isNotEmpty == true) return;
 
-    var io = this.io;
+    Manager io = this.io;
     subs = [
       util.on(io, 'open', onopen),
       util.on(io, 'packet', onpacket),
-      util.on(io, 'error', onerror),
       util.on(io, 'close', onclose)
     ];
   }
@@ -103,10 +100,9 @@ class Socket extends EventEmitter {
   Socket connect() {
     if (connected) return this;
     subEvents();
-    if (!io.reconnecting) {
-      io.open(); // ensure open
-    }
+    io.open(); // ensure open
     if ('open' == io.readyState) onopen();
+    emit('connecting');
     return this;
   }
 
@@ -132,6 +128,10 @@ class Socket extends EventEmitter {
     emitWithAck(event, data);
   }
 
+  void emitWithBinary(String event, [data]) {
+    emitWithAck(event, data, binary: true);
+  }
+
   ///
   /// Emits to this client.
   ///
@@ -152,9 +152,12 @@ class Socket extends EventEmitter {
       }
 
       var packet = {
-        'type': EVENT,
+        'type': binary ? BINARY_EVENT : EVENT,
         'data': sendData,
-        'options': {'compress': flags.isNotEmpty == true && flags['compress']}
+        'options': {
+          'compress':
+              flags != null && flags!.isNotEmpty == true && flags!['compress']
+        }
       };
 
       // event ack callback
@@ -163,21 +166,13 @@ class Socket extends EventEmitter {
         acks['$ids'] = ack;
         packet['id'] = '${ids++}';
       }
-      final isTransportWritable = io.engine != null &&
-          io.engine!.transport != null &&
-          io.engine!.transport!.writable == true;
 
-      final discardPacket =
-          flags['volatile'] != null && (!isTransportWritable || !connected);
-      if (discardPacket) {
-        _logger
-            .fine('discard packet as the transport is not currently writable');
-      } else if (connected) {
+      if (connected == true) {
         this.packet(packet);
       } else {
         sendBuffer.add(packet);
       }
-      flags = {};
+      flags = null;
     }
   }
 
@@ -199,31 +194,12 @@ class Socket extends EventEmitter {
     _logger.fine('transport is open - connecting');
 
     // write connect packet if necessary
-    // if ('/' != nsp) {
-    // if (query?.isNotEmpty == true) {
-    //   packet({'type': CONNECT, 'query': query});
-    // } else {
-    // packet({'type': CONNECT});
-    // }
-    // }
-
-    if (auth != null) {
-      if (auth is Function) {
-        auth((data) {
-          packet({'type': CONNECT, 'data': data});
-        });
+    if ('/' != nsp) {
+      if ((query != null) && (query!.isNotEmpty == true)) {
+        packet({'type': CONNECT, 'query': query});
       } else {
-        packet({'type': CONNECT, 'data': auth});
+        packet({'type': CONNECT});
       }
-    } else {
-      packet({'type': CONNECT});
-    }
-  }
-
-  /// Called upon engine or manager `error`
-  void onerror(err) {
-    if (!connected) {
-      emit('connect_error', err);
     }
   }
 
@@ -251,16 +227,7 @@ class Socket extends EventEmitter {
 
     switch (packet['type']) {
       case CONNECT:
-        if (packet['data'] != null && packet['data']['sid'] != null) {
-          final id = packet['data']['sid'];
-          onconnect(id);
-        } else if (io.engine?.id != null) {
-          final id = io.engine?.id;
-          onconnect(id);
-        } else {
-          emit('connect_error',
-              'It seems you are trying to reach a Socket.IO server in v2.x with a v3.x client, but they are not compatible (more information here: https://socket.io/docs/v3/migrating-from-2-x-to-3-0/)');
-        }
+        onconnect();
         break;
 
       case EVENT:
@@ -283,7 +250,7 @@ class Socket extends EventEmitter {
         ondisconnect();
         break;
 
-      case CONNECT_ERROR:
+      case ERROR:
         emit('error', packet['data']);
         break;
     }
@@ -346,7 +313,7 @@ class Socket extends EventEmitter {
   /// @param {Object} packet
   /// @api private
   void onack(Map packet) {
-    var ack = acks.remove('${packet['id']}');
+    var ack = acks.remove(packet['id']);
     if (ack is Function) {
       _logger.fine('''calling ack ${packet['id']} with ${packet['data']}''');
 
@@ -366,8 +333,7 @@ class Socket extends EventEmitter {
   /// Called upon server connect.
   ///
   /// @api private
-  void onconnect(id) {
-    this.id = id;
+  void onconnect() {
     connected = true;
     disconnected = false;
     emit('connect');
@@ -414,12 +380,10 @@ class Socket extends EventEmitter {
   /// @api private.
 
   void destroy() {
-    final _subs = subs;
-    if (_subs != null && _subs.isNotEmpty) {
+    if ((subs != null) && (subs!.isNotEmpty == true)) {
       // clean subscriptions to avoid reconnections
-
-      for (var i = 0; i < _subs.length; i++) {
-        _subs[i].destroy();
+      for (var i = 0; i < subs!.length; i++) {
+        subs![i].destroy();
       }
       subs = null;
     }
@@ -467,7 +431,8 @@ class Socket extends EventEmitter {
   /// @return {Socket} self
   /// @api public
   Socket compress(compress) {
-    flags['compress'] = compress;
+    flags = flags ??= {};
+    flags!['compress'] = compress;
     return this;
   }
 }

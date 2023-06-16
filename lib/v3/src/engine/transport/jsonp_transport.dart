@@ -158,7 +158,9 @@ class JSONPTransport extends PollingTransport {
   void doPoll() {
     var script = document.createElement('script') as ScriptElement;
 
-    this.script?.remove();
+    if (this.script != null) {
+      this.script!.remove();
+    }
     this.script = null;
 
     script.async = true;
@@ -170,9 +172,9 @@ class JSONPTransport extends PollingTransport {
     var scripts = document.getElementsByTagName('script');
     var insertAt = scripts.isNotEmpty ? scripts.first as ScriptElement : null;
     if (insertAt != null) {
-      insertAt.parentNode!.insertBefore(script, insertAt);
+      insertAt.parentNode.insertBefore(script, insertAt);
     } else {
-      (document.head ?? document.body!).append(script);
+      (document.head ?? document.body).append(script);
     }
     this.script = script;
 
@@ -181,7 +183,7 @@ class JSONPTransport extends PollingTransport {
     if (isUAgecko) {
       Timer(Duration(milliseconds: 100), () {
         var iframe = document.createElement('iframe');
-        document.body!.append(iframe);
+        document.body.append(iframe);
         iframe.remove();
       });
     }
@@ -209,7 +211,7 @@ class JSONPTransport extends PollingTransport {
       form.setAttribute('accept-charset', 'utf-8');
       area.name = 'd';
       form.append(area);
-      document.body!.append(form);
+      document.body.append(form);
 
       this.form = form;
       this.area = area;
@@ -230,9 +232,9 @@ class JSONPTransport extends PollingTransport {
       iframe!.name = iframeId;
       iframe!.src = 'javascript:0';
 
-      iframe!.id = iframeId!;
+      iframe!.id = iframeId;
 
-      form!.append(iframe!);
+      form!.append(iframe);
       iframe = iframe;
     };
 

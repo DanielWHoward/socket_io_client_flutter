@@ -1,7 +1,7 @@
 // Copyright (C) 2017 Potix Corporation. All Rights Reserved
 // History: 26/04/2017
 // Author: jumperchen<jumperchen@potix.com>
-import 'package:socket_io_common/src/util/event_emitter.dart';
+import '../socket_io_common/src/util/event_emitter.dart';
 
 ///
 /// Helper for subscriptions.

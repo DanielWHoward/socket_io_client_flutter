@@ -6,9 +6,9 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:logging/logging.dart';
-import 'package:socket_io_common/src/util/event_emitter.dart';
+import '../../socket_io_common/src/util/event_emitter.dart';
 import '../../src/engine/parseqs.dart';
-import '../../src/socket_io_common_flutter/parser3.dart' as parser;
+import '../../socket_io_common/src/engine/parser/parser.dart' as parser;
 import '../../src/engine/transport/polling_transport.dart';
 import './transport/transport.dart';
 
@@ -30,51 +30,51 @@ final Logger _logger = Logger('socket_io_client_flutter:engine.Socket');
 ///
 class Socket extends EventEmitter {
   late Map opts;
-  late Uri uri;
-  late bool secure;
-  bool? agent;
-  late String hostname;
-  int? port;
-  late Map query;
-  bool? upgrade;
-  late dynamic path;
-  bool? forceJSONP;
-  bool? jsonp;
-  bool? forceBase64;
-  bool? enablesXDR;
-  String? timestampParam;
+  Uri? uri;
+  bool secure = false;
+  bool agent = false;
+  String hostname = '';
+  int port = 80;
+  Map query = {};
+  bool upgrade = false;
+  String path;
+  bool forceJSONP = false;
+  bool jsonp = true;
+  bool forceBase64 = false;
+  bool enablesXDR = false;
+  String timestampParam = '';
   var timestampRequests;
-  late List<String> transports;
-  late Map transportOptions;
+  List<String> transports = [];
+  Map transportOptions = {};
   String readyState = '';
   List writeBuffer = [];
   int prevBufferLen = 0;
-  int? policyPort;
-  bool? rememberUpgrade;
+  int policyPort = 843;
+  bool? rememberUpgrade = false;
   var binaryType;
-  bool? onlyBinaryUpgrades;
-  late Map perMessageDeflate;
+  bool onlyBinaryUpgrades = false;
+  Map perMessageDeflate = {};
   String? id;
-  late List upgrades;
-  late int pingInterval;
-  late int pingTimeout;
+  List upgrades = [];
+  int? pingInterval;
+  int? pingTimeout;
   Timer? pingIntervalTimer;
   Timer? pingTimeoutTimer;
-  int? requestTimeout;
+  int requestTimeout = 30000;
   Transport? transport;
-  bool? supportsBinary;
-  bool? upgrading;
-  Map? extraHeaders;
+  bool supportsBinary = false;
+  bool upgrading = false;
+  Map extraHeaders = <String, dynamic>{};
 
   Socket(String uri, Map? opts) {
     opts = opts ?? <dynamic, dynamic>{};
 
     if (uri.isNotEmpty) {
       this.uri = Uri.parse(uri);
-      opts['hostname'] = this.uri.host;
-      opts['secure'] = this.uri.scheme == 'https' || this.uri.scheme == 'wss';
-      opts['port'] = this.uri.port;
-      if (this.uri.hasQuery) opts['query'] = this.uri.query;
+      opts['hostname'] = this.uri!.host;
+      opts['secure'] = this.uri!.scheme == 'https' || this.uri!.scheme == 'wss';
+      opts['port'] = this.uri!.port;
+      if (this.uri!.hasQuery) opts['query'] = this.uri!.query;
     } else if (opts.containsKey('host')) {
       opts['hostname'] = Uri.parse(opts['host']).host;
     }
@@ -103,13 +103,10 @@ class Socket extends EventEmitter {
     }
 
     upgrade = opts['upgrade'] != false;
-    path = opts['path'] ?? '/engine.io';
-    if (path is String) {
-      path = path
-              .toString()
-              .replaceFirst(RegExp(r'\/$'), '') +
-          '/';
-    }
+    path = (opts['path'] ?? '/engine.io')
+            .toString()
+            .replaceFirst(RegExp(r'\/$'), '') +
+        '/';
     forceJSONP = opts['forceJSONP'] == true;
     jsonp = opts['jsonp'] != false;
     forceBase64 = opts['forceBase64'] == true;
@@ -174,7 +171,7 @@ class Socket extends EventEmitter {
   /// Protocol version.
   ///
   /// @api public
-  static int protocol = parser.PacketParser3.protocol; // this is an int
+  static int protocol = parser.protocol; // this is an int
 
 //
 //  Socket.Socket = Socket;
@@ -193,7 +190,7 @@ class Socket extends EventEmitter {
     var query = Map.from(this.query);
 
     // append engine.io protocol identifier
-    query['EIO'] = parser.PacketParser3.protocol;
+    query['EIO'] = parser.protocol;
 
     // transport name
     query['transport'] = name;
@@ -274,7 +271,7 @@ class Socket extends EventEmitter {
   ///
   /// @api private
   void setTransport(transport) {
-    _logger.fine('setting transport ${transport?.name}');
+    _logger.fine('setting transport ${transport.name}');
 
     if (this.transport != null) {
       _logger.fine('clearing existing transport ${this.transport!.name}');
@@ -286,7 +283,6 @@ class Socket extends EventEmitter {
 
     // set up transport listeners
     transport
-      ..on('outOfBand', (data) => onOutOfBand(data))
       ..on('drain', (_) => onDrain())
       ..on('packet', (packet) => onPacket(packet))
       ..on('error', (e) => onError(e))
@@ -326,7 +322,7 @@ class Socket extends EventEmitter {
           if (transport == null) return;
           priorWebsocketSuccess = 'websocket' == transport!.name;
 
-          _logger.fine('pausing current transport "${transport?.name}"');
+          _logger.fine('pausing current transport "${transport!.name}"');
           if (this.transport is PollingTransport) {
             (this.transport as PollingTransport).pause(() {
               if (failed) return;
@@ -384,7 +380,7 @@ class Socket extends EventEmitter {
     // When the socket is upgraded while we're probing
     var onupgrade = (to) {
       if (transport != null && to.name != transport!.name) {
-        _logger.fine('"${to?.name}" works - aborting "${transport?.name}"');
+        _logger.fine('"${to.name}" works - aborting "${transport!.name}"');
         freezeTransport();
       }
     };
@@ -453,9 +449,8 @@ class Socket extends EventEmitter {
           onHandshake(json.decode(data ?? 'null'));
           break;
 
-        case 'ping':
-          resetPingTimeout();
-          sendPacket(type: 'pong');
+        case 'pong':
+          setPing();
           emit('pong');
           break;
 
@@ -474,18 +469,6 @@ class Socket extends EventEmitter {
   }
 
   ///
-  ///Sets and resets ping timeout timer based on server pings.
-  /// @api private
-  ///
-  void resetPingTimeout() {
-    pingTimeoutTimer?.cancel();
-    pingTimeoutTimer =
-        Timer(Duration(milliseconds: pingInterval + pingTimeout), () {
-      onClose('ping timeout');
-    });
-  }
-
-  ///
   /// Called upon handshake completion.
   ///
   /// @param {Object} handshake obj
@@ -500,41 +483,51 @@ class Socket extends EventEmitter {
     onOpen();
     // In case open handler closes socket
     if ('closed' == readyState) return;
-    resetPingTimeout();
+    setPing();
 
     // Prolong liveness of socket on heartbeat
-    // off('heartbeat', onHeartbeat);
-    // on('heartbeat', onHeartbeat);
+    off('heartbeat', onHeartbeat);
+    on('heartbeat', onHeartbeat);
   }
 
   ///
   /// Resets ping timeout.
   ///
   /// @api private
-  // void onHeartbeat(timeout) {
-  //   pingTimeoutTimer?.cancel();
-  //   pingTimeoutTimer = Timer(
-  //       Duration(milliseconds: timeout ?? (pingInterval + pingTimeout)), () {
-  //     if ('closed' == readyState) return;
-  //     onClose('ping timeout');
-  //   });
-  // }
+  void onHeartbeat(timeout) {
+    if (pingTimeoutTimer != null) {
+      pingTimeoutTimer!.cancel();
+    }
+    pingTimeoutTimer = Timer(
+        Duration(milliseconds: timeout ?? (pingInterval! + pingTimeout!)), () {
+      if ('closed' == readyState) return;
+      onClose('ping timeout');
+    });
+  }
+
+  ///
+  /// Pings server every `this.pingInterval` and expects response
+  /// within `this.pingTimeout` or closes connection.
+  ///
+  /// @api private
+  void setPing() {
+    if (pingIntervalTimer != null) {
+      pingIntervalTimer!.cancel();
+    }
+    pingIntervalTimer = Timer(Duration(milliseconds: pingInterval!), () {
+      _logger
+          .fine('writing ping packet - expecting pong within ${pingTimeout}ms');
+      ping();
+      onHeartbeat(pingTimeout);
+    });
+  }
 
   ///
   /// Sends a ping packet.
   ///
   /// @api private
-  // void ping() {
-  //   sendPacket(type: 'ping', callback: (_) => emit('ping'));
-  // }
-
-  ///
-  /// Called on `outOfBand` event
-  ///
-  /// @api private
-  void onOutOfBand(data) {
-    void Function(String) outOfBand = opts['outOfBand'] ?? (_) {};
-    outOfBand(data);
+  void ping() {
+    sendPacket(type: 'ping', callback: (_) => emit('ping'));
   }
 
   ///
@@ -682,8 +675,12 @@ class Socket extends EventEmitter {
       _logger.fine('socket close with reason: "$reason"');
 
       // clear timers
-      pingIntervalTimer?.cancel();
-      pingTimeoutTimer?.cancel();
+      if (pingIntervalTimer != null) {
+        pingIntervalTimer!.cancel();
+      }
+      if (pingTimeoutTimer != null) {
+        pingTimeoutTimer!.cancel();
+      }
 
       // stop event from firing again for transport
       transport!.off('close');

@@ -8,7 +8,7 @@ import 'dart:typed_data';
 //import 'dart:html';
 import 'package:logging/logging.dart';
 import '../../../src/engine/transport/transport.dart';
-import '../../../src/socket_io_common_flutter/parser3.dart';
+import '../../../socket_io_common/src/engine/parser/parser.dart';
 import '../../../src/engine/parseqs.dart';
 
 class IOWebSocketTransport extends Transport {
@@ -59,7 +59,7 @@ class IOWebSocketTransport extends Transport {
   /// @api private
   void addEventListeners() {
     var isOpen = false;
-    ws?.listen((data) {
+    ws!.listen((data) {
       if (isOpen != true) {
         onOpen();
         isOpen = true;
@@ -91,7 +91,7 @@ class IOWebSocketTransport extends Transport {
     // encodePacket efficient as it uses WS framing
     // no need for encodePayload
     packets.forEach((packet) {
-      PacketParser3.encodePacket(packet,
+      PacketParser.encodePacket(packet,
           supportsBinary: supportsBinary, fromClient: true, callback: (data) {
         // Sometimes the websocket has already been closed but the browser didn't
         // have a chance of informing us about it yet, in that case send will
@@ -99,9 +99,9 @@ class IOWebSocketTransport extends Transport {
         try {
           // TypeError is thrown when passing the second argument on Safari
           if (data is ByteBuffer) {
-            ws?.add(data.asUint8List());
+            ws!.add(data.asUint8List());
           } else {
-            ws?.add(data);
+            ws!.add(data);
           }
         } catch (e) {
           _logger.fine('websocket closed before onclose event');
@@ -118,7 +118,7 @@ class IOWebSocketTransport extends Transport {
   /// @api private
   @override
   void doClose() {
-    ws?.close();
+    ws!.close();
   }
 
   ///
