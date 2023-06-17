@@ -28,6 +28,7 @@ abstract class PollingTransport extends Transport {
   @override
   bool? supportsBinary;
   bool? polling;
+  bool outOfBandDetection = false;
 
   ///
   /// Polling interface.
@@ -129,8 +130,7 @@ abstract class PollingTransport extends Transport {
     };
 
     // decode payload
-    self.decodePayload(data,
-        binaryType: socket!.binaryType != true, callback: callback);
+    self.decodePayload(data, binaryType: socket!.binaryType ?? false, callback: callback);
 
     // if an event did not trigger closing
     if ('closed' != readyState) {
@@ -185,7 +185,7 @@ abstract class PollingTransport extends Transport {
     var cleanData = '';
     var outOfBand = '';
     var matchPos = [];
-    if (data is String) {
+    if (outOfBandDetection && data is String) {
       data = data.substring(data.startsWith('ok') ? 2 : 0);
       // find packets
       var pos = data.indexOf(':');
@@ -246,7 +246,7 @@ abstract class PollingTransport extends Transport {
       if (outOfBand != '') {
         self.outOfBand(outOfBand);
       }
-    } else if (data) {
+    } else if (data != null) {
       PacketParser.decodePayload(data, binaryType: binaryType, callback: callback);
     }
   }
@@ -272,7 +272,7 @@ abstract class PollingTransport extends Transport {
         if ((data is! String) || packetRegExp.hasMatch(data)) {
           // decode payload
           self.decodePayload(data,
-              binaryType: self.socket!.binaryType, callback: callback);
+              binaryType: self.socket!.binaryType ?? false, callback: callback);
         } else {
           self.outOfBand(data);
         }

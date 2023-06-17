@@ -30,7 +30,7 @@ final Logger _logger = Logger('socket_io_client_flutter:engine.Socket');
 ///
 class Socket extends EventEmitter {
   late Map opts;
-  Uri? uri;
+  late Uri uri;
   bool secure = false;
   bool agent = false;
   String hostname = '';
@@ -66,15 +66,15 @@ class Socket extends EventEmitter {
   bool upgrading = false;
   Map extraHeaders = <String, dynamic>{};
 
-  Socket(String uri, Map? opts) {
-    opts = opts ?? <dynamic, dynamic>{};
+  Socket(String uri, Map? initialOpts) {
+    opts = initialOpts ?? <dynamic, dynamic>{};
 
     if (uri.isNotEmpty) {
       this.uri = Uri.parse(uri);
-      opts['hostname'] = this.uri!.host;
-      opts['secure'] = this.uri!.scheme == 'https' || this.uri!.scheme == 'wss';
-      opts['port'] = this.uri!.port;
-      if (this.uri!.hasQuery) opts['query'] = this.uri!.query;
+      opts['hostname'] = this.uri.host;
+      opts['secure'] = this.uri.scheme == 'https' || this.uri.scheme == 'wss';
+      opts['port'] = this.uri.port;
+      if (this.uri.hasQuery) opts['query'] = this.uri.query;
     } else if (opts.containsKey('host')) {
       opts['hostname'] = Uri.parse(opts['host']).host;
     }
@@ -121,7 +121,7 @@ class Socket extends EventEmitter {
     policyPort = opts['policyPort'] ?? 843;
     rememberUpgrade = opts['rememberUpgrade'] ?? false;
     binaryType = null;
-    onlyBinaryUpgrades = opts['onlyBinaryUpgrades'];
+    onlyBinaryUpgrades = opts['onlyBinaryUpgrades'] ?? false;
 
     if (!opts.containsKey('perMessageDeflate') ||
         opts['perMessageDeflate'] == true) {

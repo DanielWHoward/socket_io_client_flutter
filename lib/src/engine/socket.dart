@@ -66,8 +66,8 @@ class Socket extends EventEmitter {
   bool? upgrading;
   Map? extraHeaders;
 
-  Socket(String uri, Map? opts) {
-    opts = opts ?? <dynamic, dynamic>{};
+  Socket(String uri, Map? initialOpts) {
+    opts = initialOpts ?? <dynamic, dynamic>{};
 
     if (uri.isNotEmpty) {
       this.uri = Uri.parse(uri);

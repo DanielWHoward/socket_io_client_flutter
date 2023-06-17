@@ -26,6 +26,7 @@ abstract class PollingTransport extends Transport {
   @override
   bool? supportsBinary;
   bool? polling;
+  bool outOfBandDetection = false;
 
   ///
   /// Polling interface.
@@ -156,7 +157,7 @@ abstract class PollingTransport extends Transport {
     var outOfBand = '';
     var matchPos = [];
     var packets = [];
-    if (data is String) {
+    if (outOfBandDetection && data is String) {
       data = data.substring(data.startsWith('ok') ? 2 : 0);
       // find packets
       var pos = data.indexOf(':');
@@ -217,7 +218,7 @@ abstract class PollingTransport extends Transport {
       if (outOfBand != '') {
         self.outOfBand(outOfBand);
       }
-    } else if (data) {
+    } else if (data != null) {
       packets = PacketParser.decodePayload(data, binaryType);
     }
     return packets;
