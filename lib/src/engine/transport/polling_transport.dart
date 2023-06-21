@@ -127,7 +127,7 @@ abstract class PollingTransport extends Transport {
     };
 
     // decode payload
-    PacketParser.decodePayload(data, socket!.binaryType).forEach(callback);
+    self.decodePayload(data, binaryType: socket!.binaryType ?? false).forEach(callback);
 
     // if an event did not trigger closing
     if ('closed' != readyState) {
@@ -141,6 +141,86 @@ abstract class PollingTransport extends Transport {
         _logger.fine('ignoring poll - transport state "$readyState"');
       }
     }
+  }
+
+  ///
+  /// Removes out of band data and decodes the clean payload.
+  ///
+  /// @param {Array} data packets
+  /// @param {Object} typ type
+  /// @param {Function} callback parser callback
+  /// @api private
+  decodePayload(data, {bool binaryType = false}) {
+    var self = this;
+    var cleanData = '';
+    var outOfBand = '';
+    var matchPos = [];
+    var packets = [];
+    if (data is String) {
+      data = data.substring(data.startsWith('ok') ? 2 : 0);
+      // find packets
+      var pos = data.indexOf(':');
+      while (pos != -1) {
+        if ((pos > 0) &&
+            (pos < (data.length - 1)) &&
+            (data[pos - 1].compareTo('0') != -1) &&
+            (data[pos - 1].compareTo('9') != 1) &&
+            (data[pos + 1].compareTo('0') != -1) &&
+            (data[pos + 1].compareTo('9') != 1)) {
+          matchPos.add(pos);
+        }
+        pos = data.indexOf(':', pos + 1);
+      }
+      // separate packets from out of band data
+      var prev = 0;
+      var start = 0;
+      var end = 0;
+      var del = 0;
+      var len = 0;
+      var heur = 0;
+      for (var m=0; m < matchPos.length; ++m) {
+        start = matchPos[m] - del - 1;
+        end = start + 1;
+        while ((start >= 0) &&
+            (data[start].compareTo('0') != -1) &&
+            (data[start].compareTo('9') != 1)) {
+          len = int.parse(data.substring(start, end));
+          // heuristic to ignore extra outOfBand digit
+          heur = data.length;
+          if ((m + 1) < matchPos.length) {
+            heur = matchPos[m+1] - del - 1;
+          }
+          if ((end + len) >= heur) {
+            break;
+          }
+          --start;
+        }
+        ++start;
+        if ((start >= 2) && (data.substring(start - 2, start) == 'ok')) {
+          data = data.substring(0, start - 2) + data.substring(start);
+          del += 2;
+          start -= 2;
+        }
+        end = matchPos[m] - del;
+        len = int.parse(data.substring(start, end));
+        cleanData += data.substring(start, end+len+1);
+        outOfBand += data.substring(prev, start);
+        prev = end+len+1;
+      }
+      if (prev < data.length) {
+        outOfBand += data.substring(prev);
+      }
+      // decode packets
+      if (cleanData != '') {
+        packets = PacketParser.decodePayload(cleanData, binaryType);
+      }
+      if (outOfBand != '') {
+        self.outOfBand(outOfBand);
+      }
+    } else if (data) {
+      packets = PacketParser.decodePayload(data, binaryType);
+    }
+    return packets;
   }
 
   ///
@@ -189,7 +269,7 @@ abstract class PollingTransport extends Transport {
         final packetRegExp = RegExp(r'^\d+:\d+');
         if ((data is! String) || packetRegExp.hasMatch(data)) {
           // decode payload
-          PacketParser.decodePayload(data,
+          self.decodePayload(data,
               binaryType: self.socket!.binaryType ?? false).forEach(callback);
         } else {
           self.outOfBand(data);
