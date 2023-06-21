@@ -37,7 +37,7 @@ class Socket extends EventEmitter {
   int? port;
   late Map query;
   bool? upgrade;
-  late String path;
+  late dynamic path;
   bool? forceJSONP;
   bool? jsonp;
   bool? forceBase64;
@@ -103,10 +103,13 @@ class Socket extends EventEmitter {
     }
 
     upgrade = opts['upgrade'] != false;
-    path = (opts['path'] ?? '/engine.io')
-            .toString()
-            .replaceFirst(RegExp(r'\/$'), '') +
-        '/';
+    path = opts['path'] ?? '/engine.io';
+    if (path is String) {
+      path = path
+              .toString()
+              .replaceFirst(RegExp(r'\/$'), '') +
+          '/';
+    }
     forceJSONP = opts['forceJSONP'] == true;
     jsonp = opts['jsonp'] != false;
     forceBase64 = opts['forceBase64'] == true;

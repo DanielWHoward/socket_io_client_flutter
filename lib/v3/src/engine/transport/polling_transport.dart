@@ -216,6 +216,11 @@ abstract class PollingTransport extends Transport {
     var query = this.query ?? {};
     var schema = secure ? 'https' : 'http';
     var port = '';
+    var basepath = path;
+    if (path is Function) {
+      basepath = (path as Function)();
+      basepath = Uri.parse(basepath).path;
+    }
 
     // cache busting is forced
     if (timestampRequests != false) {
@@ -246,7 +251,7 @@ abstract class PollingTransport extends Transport {
         '://' +
         (ipv6 ? '[' + hostname + ']' : hostname) +
         port +
-        path +
+        basepath +
         queryString;
   }
 

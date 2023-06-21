@@ -48,7 +48,16 @@ v4Socket.Socket io(uri, [opts]) => _lookup(uri, opts);
 v4Socket.Socket _lookup(uri, opts) {
   opts = opts ?? <dynamic, dynamic>{};
 
+  bool isPath = false;
+  if (uri is! String) {
+    opts = uri;
+    uri = uri['path'] is Function ? uri['path']() : uri['path'];
+    isPath = true;
+  }
   var parsed = Uri.parse(uri);
+  if (isPath && opts['path'] is! Function) {
+    opts['path'] = parsed.path;
+  }
   var id = '${parsed.scheme}://${parsed.host}:${parsed.port}';
   var path = parsed.path;
   var sameNamespace = cache.containsKey(id) && cache[id].nsps.containsKey(path);

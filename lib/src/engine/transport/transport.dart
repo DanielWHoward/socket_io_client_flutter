@@ -9,7 +9,7 @@ import '../../../src/engine/socket.dart';
 abstract class Transport extends EventEmitter {
   static final Logger _logger = Logger('socket_io_client_flutter:transport.Transport');
 
-  late String path;
+  late dynamic path;
   late String hostname;
   int? port;
   late bool secure;
