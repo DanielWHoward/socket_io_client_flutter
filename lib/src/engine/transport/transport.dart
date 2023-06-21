@@ -128,6 +128,12 @@ abstract class Transport extends EventEmitter {
   }
 
   ///
+  /// Called with out of band data.
+  void outOfBand(data) {
+    emit('outOfBand', data);
+  }
+
+  ///
   /// Called upon close.
   ///
   /// @api private

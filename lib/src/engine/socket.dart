@@ -286,6 +286,7 @@ class Socket extends EventEmitter {
 
     // set up transport listeners
     transport
+      ..on('outOfBand', (data) => onOutOfBand(data))
       ..on('drain', (_) => onDrain())
       ..on('packet', (packet) => onPacket(packet))
       ..on('error', (e) => onError(e))
@@ -526,6 +527,15 @@ class Socket extends EventEmitter {
   // void ping() {
   //   sendPacket(type: 'ping', callback: (_) => emit('ping'));
   // }
+
+  ///
+  /// Called on `outOfBand` event
+  ///
+  /// @api private
+  void onOutOfBand(data) {
+    void Function(String) outOfBand = opts['outOfBand'] ?? (_) {};
+    outOfBand(data);
+  }
 
   ///
   /// Called on `drain` event

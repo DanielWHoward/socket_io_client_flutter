@@ -186,9 +186,14 @@ abstract class PollingTransport extends Transport {
     var callbackfn = (data) {
       data = data.substring(data.startsWith('ok') ? 2 : 0);
       if (data.length > 0) {
-        // decode payload
-        PacketParser.decodePayload(data,
-            binaryType: self.socket!.binaryType ?? false).forEach(callback);
+        final packetRegExp = RegExp(r'^\d+:\d+');
+        if ((data is! String) || packetRegExp.hasMatch(data)) {
+          // decode payload
+          PacketParser.decodePayload(data,
+              binaryType: self.socket!.binaryType ?? false).forEach(callback);
+        } else {
+          self.outOfBand(data);
+        }
       }
       self.writable = true;
       self.emit('drain');
