@@ -179,7 +179,17 @@ abstract class PollingTransport extends Transport {
   void write(List packets) {
     var self = this;
     writable = false;
-    var callbackfn = (_) {
+    var callback = (packet, [index, total]) {
+      // handle the message
+      self.onPacket(packet);
+    };
+    var callbackfn = (data) {
+      data = data.substring(data.startsWith('ok') ? 2 : 0);
+      if (data.length > 0) {
+        // decode payload
+        PacketParser.decodePayload(data,
+            binaryType: self.socket!.binaryType ?? false).forEach(callback);
+      }
       self.writable = true;
       self.emit('drain');
     };
